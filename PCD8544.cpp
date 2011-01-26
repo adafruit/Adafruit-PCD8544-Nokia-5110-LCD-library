@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <stdlib.h>
 
 #include "PCD8544.h"
-
+#include "glcdfont.c"
 
 uint8_t is_reversed = 0;
 
@@ -92,9 +92,8 @@ static void updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax, uint8_t 
   if (ymax > yUpdateMax) yUpdateMax = ymax;
 #endif
 }
-/*
 
-void ST7565::drawbitmap(uint8_t x, uint8_t y, 
+void PCD8544::drawbitmap(uint8_t x, uint8_t y, 
 			const uint8_t *bitmap, uint8_t w, uint8_t h,
 			uint8_t color) {
   for (uint8_t j=0; j<h; j++) {
@@ -108,7 +107,8 @@ void ST7565::drawbitmap(uint8_t x, uint8_t y,
   updateBoundingBox(x, y, x+w, y+h);
 }
 
-void ST7565::drawstring(uint8_t x, uint8_t line, char *c) {
+
+void PCD8544::drawstring(uint8_t x, uint8_t line, char *c) {
   while (c[0] != 0) {
     drawchar(x, line, c[0]);
     c++;
@@ -123,7 +123,7 @@ void ST7565::drawstring(uint8_t x, uint8_t line, char *c) {
 }
 
 
-void ST7565::drawstring_P(uint8_t x, uint8_t line, const char *str) {
+void PCD8544::drawstring_P(uint8_t x, uint8_t line, const char *str) {
   while (1) {
     char c = pgm_read_byte(str++);
     if (! c)
@@ -139,18 +139,20 @@ void ST7565::drawstring_P(uint8_t x, uint8_t line, const char *str) {
   }
 }
 
-void  ST7565::drawchar(uint8_t x, uint8_t line, char c) {
+void  PCD8544::drawchar(uint8_t x, uint8_t line, char c) {
+  if (line >= LCDHEIGHT/8) return;
+  if ((x+5) >= LCDWIDTH) return;
+
   for (uint8_t i =0; i<5; i++ ) {
-    st7565_buffer[x + (line*128) ] = pgm_read_byte(font+(c*5)+i);
+    pcd8544_buffer[x + (line*LCDWIDTH) ] = pgm_read_byte(font+(c*5)+i);
     x++;
   }
 
   updateBoundingBox(x, line*8, x+5, line*8 + 8);
 }
 
-
 // bresenham's algorithm - thx wikpedia
-void ST7565::drawline(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, 
+void PCD8544::drawline(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, 
 		      uint8_t color) {
   uint8_t steep = abs(y1 - y0) > abs(x1 - x0);
   if (steep) {
@@ -192,8 +194,9 @@ void ST7565::drawline(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,
   }
 }
 
+
 // filled rectangle
-void ST7565::fillrect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, 
+void PCD8544::fillrect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, 
 		      uint8_t color) {
 
   // stupidest version - just pixels - but fast with internal buffer!
@@ -207,7 +210,7 @@ void ST7565::fillrect(uint8_t x, uint8_t y, uint8_t w, uint8_t h,
 }
 
 // draw a rectangle
-void ST7565::drawrect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, 
+void PCD8544::drawrect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, 
 		      uint8_t color) {
   // stupidest version - just pixels - but fast with internal buffer!
   for (uint8_t i=x; i<x+w; i++) {
@@ -223,7 +226,7 @@ void ST7565::drawrect(uint8_t x, uint8_t y, uint8_t w, uint8_t h,
 }
 
 // draw a circle outline
-void ST7565::drawcircle(uint8_t x0, uint8_t y0, uint8_t r, 
+void PCD8544::drawcircle(uint8_t x0, uint8_t y0, uint8_t r, 
 			uint8_t color) {
   updateBoundingBox(x0-r, y0-r, x0+r, y0+r);
 
@@ -259,12 +262,9 @@ void ST7565::drawcircle(uint8_t x0, uint8_t y0, uint8_t r,
     my_setpixel(x0 - y, y0 - x, color);
     
   }
-
-
-
 }
 
-void ST7565::fillcircle(uint8_t x0, uint8_t y0, uint8_t r, 
+void PCD8544::fillcircle(uint8_t x0, uint8_t y0, uint8_t r, 
 			uint8_t color) {
   updateBoundingBox(x0-r, y0-r, x0+r, y0+r);
 
@@ -299,18 +299,19 @@ void ST7565::fillcircle(uint8_t x0, uint8_t y0, uint8_t r,
   }
 }
 
-void ST7565::my_setpixel(uint8_t x, uint8_t y, uint8_t color) {
+
+void PCD8544::my_setpixel(uint8_t x, uint8_t y, uint8_t color) {
   if ((x >= LCDWIDTH) || (y >= LCDHEIGHT))
     return;
 
   // x is which column
   if (color) 
-    st7565_buffer[x+ (y/8)*128] |= _BV(7-(y%8));  
+    pcd8544_buffer[x+ (y/8)*LCDWIDTH] |= _BV(y%8);  
   else
-    st7565_buffer[x+ (y/8)*128] &= ~_BV(7-(y%8)); 
+    pcd8544_buffer[x+ (y/8)*LCDWIDTH] &= ~_BV(y%8); 
 }
 
-*/
+
 
 // the most basic function, set a single pixel
 void PCD8544::setPixel(uint8_t x, uint8_t y, uint8_t color) {
@@ -319,9 +320,9 @@ void PCD8544::setPixel(uint8_t x, uint8_t y, uint8_t color) {
 
   // x is which column
   if (color) 
-    pcd8544_buffer[x+ (y/8)*LCDWIDTH] |= _BV(7-(y%8));  
+    pcd8544_buffer[x+ (y/8)*LCDWIDTH] |= _BV(y%8);  
   else
-    pcd8544_buffer[x+ (y/8)*LCDWIDTH] &= ~_BV(7-(y%8)); 
+    pcd8544_buffer[x+ (y/8)*LCDWIDTH] &= ~_BV(y%8); 
 
   updateBoundingBox(x,y,x,y);
 }

@@ -49,6 +49,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define PCD8544_SETBIAS 0x10
 #define PCD8544_SETVOP 0x80
 
+#define swap(a, b) { uint8_t t = a; a = b; b = t; }
 
 class PCD8544 {
  public:
@@ -68,7 +69,7 @@ void setContrast(uint8_t val);
   
   void setPixel(uint8_t x, uint8_t y, uint8_t color);
   uint8_t getPixel(uint8_t x, uint8_t y);
-  /*void fillcircle(uint8_t x0, uint8_t y0, uint8_t r, 
+  void fillcircle(uint8_t x0, uint8_t y0, uint8_t r, 
 		  uint8_t color);
   void drawcircle(uint8_t x0, uint8_t y0, uint8_t r, 
 		  uint8_t color);
@@ -78,18 +79,17 @@ void setContrast(uint8_t val);
 		uint8_t color);
   void drawline(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, 
 		uint8_t color);
+  
   void drawchar(uint8_t x, uint8_t line, char c);
   void drawstring(uint8_t x, uint8_t line, char *c);
   void drawstring_P(uint8_t x, uint8_t line, const char *c);
-
   void drawbitmap(uint8_t x, uint8_t y, 
 		  const uint8_t *bitmap, uint8_t w, uint8_t h,
 		  uint8_t color);
-  */
 
  private:
   int8_t _din, _sclk, _dc, _rst, _cs;
   void spiwrite(uint8_t c);
 
-  //void my_setpixel(uint8_t x, uint8_t y, uint8_t color);
+  void my_setpixel(uint8_t x, uint8_t y, uint8_t color);
 };
