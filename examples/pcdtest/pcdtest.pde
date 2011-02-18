@@ -1,11 +1,11 @@
 #include "PCD8544.h"
 
-// pin 9 - Serial clock out (SCLK)
-// pin 8 - Serial data out (DIN)
-// pin 7 - Data/Command select (D/C)
-// pin 6 - LCD chip select (CS)
-// pin 5 - LCD reset (RST)
-PCD8544 nokia = PCD8544(9, 8, 7, 6, 5);
+// pin 7 - Serial clock out (SCLK)
+// pin 6 - Serial data out (DIN)
+// pin 5 - Data/Command select (D/C)
+// pin 4 - LCD chip select (CS)
+// pin 3 - LCD reset (RST)
+PCD8544 nokia = PCD8544(7, 6, 5, 4, 3);
 
 // a bitmap of a 16x16 fruit icon
 static unsigned char __attribute__ ((progmem)) logo16_glcd_bmp[]={
