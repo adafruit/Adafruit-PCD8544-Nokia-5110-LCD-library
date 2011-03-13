@@ -130,7 +130,7 @@ void PCD8544::drawstring_P(uint8_t x, uint8_t line, const char *str) {
       return;
     drawchar(x, line, c);
     x += 6; // 6 pixels wide
-    if (x + 6 >= LCDWIDTH) {
+    if (x + 6 > LCDWIDTH) {
       x = 0;    // ran out of this line
       line++;
     }
