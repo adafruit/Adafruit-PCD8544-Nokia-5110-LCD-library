@@ -403,14 +403,24 @@ void PCD8544::data(uint8_t c) {
 }
 
 void PCD8544::setContrast(uint8_t val) {
+  // Vop has 7 bits
   if (val > 0x7f) {
     val = 0x7f;
   }
-  command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION );
-  command( PCD8544_SETVOP | val); 
+  command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION);
+  command(PCD8544_SETVOP | val); 
   command(PCD8544_FUNCTIONSET);
 }
 
+void PCD8544::setTempControl(uint8_t val) {
+  // Temparature control has 2 bits
+  if (val > 0x3) {
+    val = 0x3;
+  }
+  command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION);
+  command(PCD8544_SETTEMP | val); 
+  command(PCD8544_FUNCTIONSET);
+}
 
 void PCD8544::display(void) {
   uint8_t col, maxcol, p;
@@ -461,6 +471,10 @@ void PCD8544::clear(void) {
   memset(pcd8544_buffer, 0, LCDWIDTH*LCDHEIGHT/8);
   updateBoundingBox(0, 0, LCDWIDTH-1, LCDHEIGHT-1);
 }
+
+
+
+
 
 /*
 // this doesnt touch the buffer, just clears the display RAM - might be handy

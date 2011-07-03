@@ -62,7 +62,8 @@ class PCD8544 {
   void command(uint8_t c);
   void data(uint8_t c);
   
-void setContrast(uint8_t val);
+  void setContrast(uint8_t val);
+  void setTempControl(uint8_t val);
   void clearDisplay(void);
   void clear();
   void display();
@@ -86,7 +87,6 @@ void setContrast(uint8_t val);
   void drawbitmap(uint8_t x, uint8_t y, 
 		  const uint8_t *bitmap, uint8_t w, uint8_t h,
 		  uint8_t color);
-
  private:
   int8_t _din, _sclk, _dc, _rst, _cs;
   void spiwrite(uint8_t c);
