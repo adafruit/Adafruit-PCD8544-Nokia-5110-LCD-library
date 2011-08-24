@@ -21,7 +21,9 @@ void setup(void) {
   Serial.println("hello!");
 
   nokia.init();
-
+  // you can change the contrast around to adapt the display
+  // for the best viewing!
+  nokia.setContrast(40);
   // turn all the pixels on (a handy test)
   nokia.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYALLON);
   delay(500);
@@ -30,7 +32,7 @@ void setup(void) {
 
   // show splashscreen
   nokia.display();
-  delay(2000);
+  //delay(2000);
   nokia.clear();
 
   // draw a single pixel
@@ -69,11 +71,21 @@ void setup(void) {
   nokia.clear();
 
   // draw a string at location (0,0)
-  nokia.drawstring(0, 0, "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor");
+  nokia.setCursor(0, 0);
+  nokia.print("Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor");
   nokia.display();
   delay(2000);
   nokia.clear();
 
+  // draw other characters, variables and such
+  nokia.setCursor(0, 20);
+  nokia.println(0xAB, HEX);
+  nokia.print(99.99);
+  nokia.println('%');
+  nokia.display();
+  delay(2000);
+  nokia.clear();
+  
   // draw a bitmap icon and 'animate' movement
   testdrawbitmap(logo16_glcd_bmp, LOGO16_GLCD_HEIGHT, LOGO16_GLCD_WIDTH);
 }

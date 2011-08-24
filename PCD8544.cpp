@@ -93,6 +93,31 @@ static void updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax, uint8_t 
 #endif
 }
 
+PCD8544::PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS, int8_t RST) {
+  _din = DIN;
+  _sclk = SCLK;
+  _dc = DC;
+  _rst = RST;
+  _cs = CS;
+  cursor_x = cursor_y = 0;
+  textsize = 1;
+  textcolor = BLACK;
+}
+
+
+
+PCD8544::PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST) {
+  _din = DIN;
+  _sclk = SCLK;
+  _dc = DC;
+  _rst = RST;
+  _cs = -1;
+  cursor_x = cursor_y = 0;
+  textsize = 1;
+  textcolor = BLACK;
+
+}
+
 void PCD8544::drawbitmap(uint8_t x, uint8_t y, 
 			const uint8_t *bitmap, uint8_t w, uint8_t h,
 			uint8_t color) {
@@ -108,48 +133,64 @@ void PCD8544::drawbitmap(uint8_t x, uint8_t y,
 }
 
 
-void PCD8544::drawstring(uint8_t x, uint8_t line, char *c) {
-  while (c[0] != 0) {
-    drawchar(x, line, c[0]);
-    c++;
-    x += 6; // 6 pixels wide
-    if (x + 6 > LCDWIDTH) {
-      x = 0;    // ran out of this line
-      line++;
-    }
-    if (line >= (LCDHEIGHT/8))
-      return;        // ran out of space :(
-  }
+void PCD8544::drawstring(uint8_t x, uint8_t y, char *c) {
+  cursor_x = x;
+  cursor_y = y;
+  print(c);
 }
 
 
-void PCD8544::drawstring_P(uint8_t x, uint8_t line, const char *str) {
+void PCD8544::drawstring_P(uint8_t x, uint8_t y, const char *str) {
+  cursor_x = x;
+  cursor_y = y;
   while (1) {
     char c = pgm_read_byte(str++);
     if (! c)
       return;
-    drawchar(x, line, c);
-    x += 6; // 6 pixels wide
-    if (x + 6 > LCDWIDTH) {
-      x = 0;    // ran out of this line
-      line++;
-    }
-    if (line >= (LCDHEIGHT/8))
-      return;        // ran out of space :(
+    print(c);
   }
 }
 
-void  PCD8544::drawchar(uint8_t x, uint8_t line, char c) {
-  if (line >= LCDHEIGHT/8) return;
+void  PCD8544::drawchar(uint8_t x, uint8_t y, char c) {
+  if (y >= LCDHEIGHT) return;
   if ((x+5) >= LCDWIDTH) return;
 
   for (uint8_t i =0; i<5; i++ ) {
-    pcd8544_buffer[x + (line*LCDWIDTH) ] = pgm_read_byte(font+(c*5)+i);
-    x++;
+    uint8_t d = pgm_read_byte(font+(c*5)+i);
+    for (uint8_t j = 0; j<8; j++) {
+      if (d & _BV(j)) {
+	my_setpixel(x+i, y+j, textcolor);
+      }
+    }
+    //    pcd8544_buffer[x + (line*LCDWIDTH) ] = 
   }
 
-  updateBoundingBox(x, line*8, x+5, line*8 + 8);
+  updateBoundingBox(x, y, x+5, y + 8);
 }
+
+void PCD8544::write(uint8_t c) {
+  if (c == '\n') {
+    cursor_y += textsize*8;
+    cursor_x = 0;
+  } else if (c == '\r') {
+    // skip em
+  } else {
+    drawchar(cursor_x, cursor_y, c);
+    cursor_x += textsize*6;
+    if (cursor_x >= (LCDWIDTH-5)) {
+      cursor_x = 0;
+      cursor_y+=8;
+    }
+    if (cursor_y >= LCDHEIGHT) 
+      cursor_y = 0;
+  }
+}
+
+void PCD8544::setCursor(uint8_t x, uint8_t y){
+  cursor_x = x; 
+  cursor_y = y;
+}
+
 
 // bresenham's algorithm - thx wikpedia
 void PCD8544::drawline(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, 
@@ -403,7 +444,15 @@ void PCD8544::data(uint8_t c) {
 }
 
 void PCD8544::setContrast(uint8_t val) {
-}
+  if (val > 0x7f) {
+    val = 0x7f;
+  }
+  command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION );
+  command( PCD8544_SETVOP | val); 
+  command(PCD8544_FUNCTIONSET);
+  
+ }
+
 
 
 void PCD8544::display(void) {
@@ -441,6 +490,7 @@ void PCD8544::display(void) {
     }
   }
 
+  command(PCD8544_SETYADDR );  // no idea why this is necessary but it is to finish the last byte?
 #ifdef enablePartialUpdate
   xUpdateMin = LCDWIDTH - 1;
   xUpdateMax = 0;
