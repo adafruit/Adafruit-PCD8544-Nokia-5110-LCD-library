@@ -161,10 +161,14 @@ void  PCD8544::drawchar(uint8_t x, uint8_t y, char c) {
       if (d & _BV(j)) {
 	my_setpixel(x+i, y+j, textcolor);
       }
+      else {
+      my_setpixel(x+i, y+j, !textcolor);
+      }
     }
-    //    pcd8544_buffer[x + (line*LCDWIDTH) ] = 
   }
-
+  for (uint8_t j = 0; j<8; j++) {
+    my_setpixel(x+5, y+j, !textcolor);
+  }
   updateBoundingBox(x, y, x+5, y + 8);
 }
 
@@ -377,15 +381,11 @@ uint8_t PCD8544::getPixel(uint8_t x, uint8_t y) {
   return (pcd8544_buffer[x+ (y/8)*LCDWIDTH] >> (7-(y%8))) & 0x1;  
 }
 
-
-void PCD8544::begin(uint8_t contrast) {
-  init();
-  //  st7565_command(CMD_DISPLAY_ON);
-  //st7565_command(CMD_SET_ALLPTS_NORMAL);
-  //st7565_set_brightness(contrast);
+void PCD8544::init(void) {
+  init(50);
 }
 
-void PCD8544::init(void) {
+void PCD8544::init(uint8_t contrast) {
   // set pin directions
   pinMode(_din, OUTPUT);
   pinMode(_sclk, OUTPUT);
@@ -409,15 +409,17 @@ void PCD8544::init(void) {
   command(PCD8544_SETBIAS | 0x4);
 
   // set VOP
-  command( PCD8544_SETVOP | 50); // Experimentally determined
+  if (contrast > 0x7f)
+    contrast = 0x7f;
+
+  command( PCD8544_SETVOP | contrast); // Experimentally determined
 
 
   // normal mode
   command(PCD8544_FUNCTIONSET);
 
-  // turn all the pixels on
-  command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYALLON);
-
+  // Set display to Normal
+  command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL);
 
   // initial display line
   // set page address
@@ -427,6 +429,12 @@ void PCD8544::init(void) {
   // set up a bounding box for screen updates
 
   updateBoundingBox(0, 0, LCDWIDTH-1, LCDHEIGHT-1);
+  // Push out pcd8544_buffer to the Display (will show the AFI logo)
+  display();
+  _delay_ms(1000);
+  // Clear the display
+  clear(); 
+  display();
 }
 
 inline void PCD8544::spiwrite(uint8_t c) {
@@ -504,6 +512,7 @@ void PCD8544::display(void) {
 void PCD8544::clear(void) {
   memset(pcd8544_buffer, 0, LCDWIDTH*LCDHEIGHT/8);
   updateBoundingBox(0, 0, LCDWIDTH-1, LCDHEIGHT-1);
+  cursor_y = cursor_x = 0;
 }
 
 /*

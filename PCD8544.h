@@ -56,8 +56,8 @@ class PCD8544 : public Print {
   PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS, int8_t RST);
   PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST);
 
+  void init(uint8_t contrast);
   void init(void);
-  void begin(uint8_t contrast); 
   
   void command(uint8_t c);
   void data(uint8_t c);
