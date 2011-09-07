@@ -23,7 +23,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 //#include <Wire.h>
 #include <avr/pgmspace.h>
-#include <WProgram.h>
+#if defined(ARDUINO) && ARDUINO >= 100
+  #include "Arduino.h"
+#else
+  #include "WProgram.h"
+#endif
 #include <util/delay.h>
 #include <stdlib.h>
 
@@ -172,7 +176,11 @@ void  PCD8544::drawchar(uint8_t x, uint8_t y, char c) {
   updateBoundingBox(x, y, x+5, y + 8);
 }
 
-void PCD8544::write(uint8_t c) {
+#if defined(ARDUINO) && ARDUINO >= 100
+  size_t PCD8544::write(uint8_t c) {
+#else
+  void PCD8544::write(uint8_t c) {
+#endif
   if (c == '\n') {
     cursor_y += textsize*8;
     cursor_x = 0;

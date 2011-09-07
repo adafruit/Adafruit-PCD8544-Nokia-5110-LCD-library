@@ -21,7 +21,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 */
 
-#include <WProgram.h>
+#if defined(ARDUINO) && ARDUINO >= 100
+  #include "Arduino.h"
+#else
+  #include "WProgram.h"
+#endif
 
 #define BLACK 1
 #define WHITE 0
@@ -83,7 +87,11 @@ class PCD8544 : public Print {
   void setCursor(uint8_t x, uint8_t y);
   void setTextSize(uint8_t s);
   void setTextColor(uint8_t c);
-  void write(uint8_t c);
+  #if defined(ARDUINO) && ARDUINO >= 100
+    size_t write(uint8_t c);
+  #else
+    void write(uint8_t c);
+  #endif
 
   void drawchar(uint8_t x, uint8_t line, char c);
   void drawstring(uint8_t x, uint8_t line, char *c);
