@@ -133,12 +133,12 @@ void testdrawbitmap(const uint8_t *bitmap, uint8_t w, uint8_t h) {
 
 void testdrawchar(void) {
   for (uint8_t i=0; i < 64; i++) {
-    nokia.drawchar((i % 14) * 6, i/14, i);
+    nokia.drawchar((i % 14) * 6, (i/14) * 8, i);
   }    
   nokia.display();
   delay(2000);
   for (uint8_t i=0; i < 64; i++) {
-    nokia.drawchar((i % 14) * 6, i/14, i + 64);
+    nokia.drawchar((i % 14) * 6, (i/14) * 8, i + 64);
   }    
 }
 
