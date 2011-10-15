@@ -1,3 +1,6 @@
+#ifndef PCD8544_H // Albert
+#define PCD8544_H // Albert
+
 /*
 $Id:$
 
@@ -53,57 +56,59 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define PCD8544_SETBIAS 0x10
 #define PCD8544_SETVOP 0x80
 
-#define swap(a, b) { uint8_t t = a; a = b; b = t; }
+#define swap(a, b) { byte t = a; a = b; b = t; }
 
 class PCD8544 : public Print {
  public:
-  PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS, int8_t RST);
-  PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST);
+  PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS=0, int8_t RST=0); // Albert use default parameters
 
-  void init(uint8_t contrast);
-  void init(void);
+  void init(byte contrast=50); // Albert use default parameters
+  //void init(void); // Albert use default parameters 
   
-  void command(uint8_t c);
-  void data(uint8_t c);
+  void command(byte c);
+  void data(byte c);
   
-  void setContrast(uint8_t val);
+  void setContrast(byte val);
   void clearDisplay(void);
   void clear();
   void display();
+  void displayBuffer();
   
-  void setPixel(uint8_t x, uint8_t y, uint8_t color);
-  uint8_t getPixel(uint8_t x, uint8_t y);
-  void fillcircle(uint8_t x0, uint8_t y0, uint8_t r, 
-		  uint8_t color);
-  void drawcircle(uint8_t x0, uint8_t y0, uint8_t r, 
-		  uint8_t color);
-  void drawrect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, 
-		uint8_t color);
-  void fillrect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, 
-		uint8_t color);
-  void drawline(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, 
-		uint8_t color);
+  void setPixel(byte x, byte y, byte color);
+  byte getPixel(byte x, byte y);
+  void fillcircle(byte x0, byte y0, byte r, 
+		  byte color);
+  void drawcircle(byte x0, byte y0, byte r, 
+		  byte color);
+  void drawrect(byte x, byte y, byte w, byte h, 
+		byte color);
+  void fillrect(byte x, byte y, byte w, byte h, 
+		byte color);
+  void drawline(byte x0, byte y0, byte x1, byte y1, 
+		byte color);
   
-  void setCursor(uint8_t x, uint8_t y);
-  void setTextSize(uint8_t s);
-  void setTextColor(uint8_t c);
+  void setCursor(byte x, byte y);
+  void setTextSize(byte s);
+  void setTextColor(byte c);
   #if defined(ARDUINO) && ARDUINO >= 100
-    size_t write(uint8_t c);
+    size_t write(byte c);
   #else
-    void write(uint8_t c);
+    void write(byte c);
   #endif
 
-  void drawchar(uint8_t x, uint8_t line, char c);
-  void drawstring(uint8_t x, uint8_t line, char *c);
-  void drawstring_P(uint8_t x, uint8_t line, const char *c);
-  void drawbitmap(uint8_t x, uint8_t y, 
-		  const uint8_t *bitmap, uint8_t w, uint8_t h,
-		  uint8_t color);
+  void drawchar(byte x, byte line, char c);
+  void drawstring(byte x, byte line, char *c);
+  void drawstring_P(byte x, byte line, const char *c);
+  void drawbitmap(byte x, byte y, 
+		  const byte *bitmap, byte w, byte h,
+		  byte color);
 
  private:
-  uint8_t cursor_x, cursor_y, textsize, textcolor;
+  byte cursor_x, cursor_y, textsize, textcolor;
   int8_t _din, _sclk, _dc, _rst, _cs;
-  void spiwrite(uint8_t c);
+  void spiwrite(byte c);
 
-  void my_setpixel(uint8_t x, uint8_t y, uint8_t color);
+  void my_setpixel(byte x, byte y, byte color);
 };
+
+#endif // Albert
