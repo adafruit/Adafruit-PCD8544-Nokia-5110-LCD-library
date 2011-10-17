@@ -389,7 +389,7 @@ uint8_t PCD8544::getPixel(uint8_t x, uint8_t y) {
   return (pcd8544_buffer[x+ (y/8)*LCDWIDTH] >> (7-(y%8))) & 0x1;  
 }
 
-void PCD8544::init(void) {
+void PCD8544::init(void) { //I would delete this, it contains duplical code. Make unused CS and/or RST pin zero
   init(50);
 }
 
@@ -398,17 +398,19 @@ void PCD8544::init(uint8_t contrast) {
   pinMode(_din, OUTPUT);
   pinMode(_sclk, OUTPUT);
   pinMode(_dc, OUTPUT);
-  pinMode(_rst, OUTPUT);
-  pinMode(_cs, OUTPUT);
-
-  // toggle RST low to reset; CS low so it'll listen to us
-  if (_cs > 0)
-    digitalWrite(_cs, LOW);
-
-  digitalWrite(_rst, LOW);
-  _delay_ms(500);
-  digitalWrite(_rst, HIGH);
-
+  
+  if(_rst > 0)
+  { pinMode(_rst, OUTPUT); // only if RST is used, else use it for other purposes   
+    // toggle RST low to reset; CS low so it'll listen to us
+    digitalWrite(_rst, LOW); // toggle RST low to reset
+    _delay_ms(1); // 500ms is too large!
+    digitalWrite(_rst, HIGH); 
+  }  
+  
+  if(_cs > 0)
+  { pinMode(_cs, OUTPUT); // only if CS is used, else use it for other purposes 
+    digitalWrite(_cs, LOW); // todo: _cs is not put high anymore!
+  }
 
   // get into the EXTENDED mode!
   command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION );
@@ -428,21 +430,6 @@ void PCD8544::init(uint8_t contrast) {
 
   // Set display to Normal
   command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL);
-
-  // initial display line
-  // set page address
-  // set column address
-  // write display data
-
-  // set up a bounding box for screen updates
-
-  updateBoundingBox(0, 0, LCDWIDTH-1, LCDHEIGHT-1);
-  // Push out pcd8544_buffer to the Display (will show the AFI logo)
-  display();
-  _delay_ms(1000);
-  // Clear the display
-  clear(); 
-  display();
 }
 
 inline void PCD8544::spiwrite(uint8_t c) {
@@ -544,3 +531,22 @@ void PCD8544::clearDisplay(void) {
 }
 
 */
+
+  // initial display line
+  // set page address
+  // set column address
+  // write display data
+
+  // set up a bounding box for screen updates
+
+void PCD8544::displayBuffer() { // better use this separate function, put it in the application only if needed
+  updateBoundingBox(0, 0, LCDWIDTH-1, LCDHEIGHT-1);
+  // Push out pcd8544_buffer to the Display (will show the AFI logo)
+  display();
+  // _delay_ms(1000); no delay allowed in init(), put this in the application
+  // Clear the display
+  // clear(); // put this in the application
+  // display(); // put this in the application
+}
+
+
