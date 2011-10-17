@@ -18,8 +18,9 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
 */
+
+// todo: _cs is never put high anymore
 
 //#include <Wire.h>
 #include <avr/pgmspace.h>
@@ -34,14 +35,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PCD8544.h"
 #include "glcdfont.c"
 
-uint8_t is_reversed = 0;
-
+byte is_reversed = 0;
 
 // a 5x7 font table
-extern uint8_t PROGMEM font[];
+extern byte PROGMEM font[];
 
 // the memory buffer for the LCD
-uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
+byte pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC, 0xFC, 0xFE, 0xFF, 0xFC, 0xE0,
@@ -76,110 +76,86 @@ uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 };
 
-
-// reduces how much is refreshed, which speeds it up!
-// originally derived from Steve Evans/JCW's mod but cleaned up and
-// optimized
-//#define enablePartialUpdate
-
-#ifdef enablePartialUpdate
-static uint8_t xUpdateMin, xUpdateMax, yUpdateMin, yUpdateMax;
-#endif
-
-
-
-static void updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax, uint8_t ymax) {
-#ifdef enablePartialUpdate
-  if (xmin < xUpdateMin) xUpdateMin = xmin;
-  if (xmax > xUpdateMax) xUpdateMax = xmax;
-  if (ymin < yUpdateMin) yUpdateMin = ymin;
-  if (ymax > yUpdateMax) yUpdateMax = ymax;
-#endif
-}
-
-PCD8544::PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS, int8_t RST) {
-  _din = DIN;
-  _sclk = SCLK;
-  _dc = DC;
-  _rst = RST;
-  _cs = CS;
-  cursor_x = cursor_y = 0;
+PCD8544::PCD8544(byte SCLK, byte DIN, byte DC, byte CS, byte RST):  
+_din(DIN), _sclk(SCLK), _dc(DC), _rst(RST), _cs(CS)
+{ cursor_x = cursor_y = 0;
   textsize = 1;
-  textcolor = BLACK;
+  textcolor = BLACK;  
 }
 
+void PCD8544::init(char VOP_contrast)
+{ pinMode(_din, OUTPUT); // set pin directions
+  pinMode(_sclk, OUTPUT);
+  pinMode(_dc, OUTPUT);
+  
+  if(_rst > 0)
+  { pinMode(_rst, OUTPUT); // only if RST is connected   
+    digitalWrite(_rst, LOW); // toggle RST low to reset
+    _delay_ms(1); 
+    digitalWrite(_rst, HIGH); 
+  }  
+  
+  if(_cs > 0)
+  { pinMode(_cs, OUTPUT); // only if CS is connected
+    digitalWrite(_cs, LOW); // CS low so it'll listen to us
+  }
+  
+  command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION ); // get into the EXTENDED mode!  
+  command(PCD8544_SETBIAS | 0x4); // LCD bias select (4 is optimal?)
+  
+  if (VOP_contrast > 0x7f) VOP_contrast = 0x7f; // todo char can't be > 0x7f 
 
-
-PCD8544::PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST) {
-  _din = DIN;
-  _sclk = SCLK;
-  _dc = DC;
-  _rst = RST;
-  _cs = -1;
-  cursor_x = cursor_y = 0;
-  textsize = 1;
-  textcolor = BLACK;
-
+  command( PCD8544_SETVOP | VOP_contrast); // experimentally determined
+  command(PCD8544_FUNCTIONSET);  // normal mode  
+  command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL); // set display to Normal  
 }
 
-void PCD8544::drawbitmap(uint8_t x, uint8_t y, 
-			const uint8_t *bitmap, uint8_t w, uint8_t h,
-			uint8_t color) {
-  for (uint8_t j=0; j<h; j++) {
-    for (uint8_t i=0; i<w; i++ ) {
+void PCD8544::drawbitmap(byte x, byte y, const byte *bitmap, byte w, byte h, byte color) {
+  for (byte j=0; j<h; j++) {
+    for (byte i=0; i<w; i++ ) {
       if (pgm_read_byte(bitmap + i + (j/8)*w) & _BV(j%8)) {
 	my_setpixel(x+i, y+j, color);
       }
     }
   }
-
   updateBoundingBox(x, y, x+w, y+h);
 }
 
-
-void PCD8544::drawstring(uint8_t x, uint8_t y, char *c) {
+void PCD8544::drawstring(byte x, byte y, char *c) {
   cursor_x = x;
   cursor_y = y;
   print(c);
 }
 
-
-void PCD8544::drawstring_P(uint8_t x, uint8_t y, const char *str) {
+void PCD8544::drawstring_P(byte x, byte y, const char *str) {
   cursor_x = x;
   cursor_y = y;
   while (1) {
     char c = pgm_read_byte(str++);
-    if (! c)
-      return;
+    if (! c) return;
     print(c);
   }
 }
 
-void  PCD8544::drawchar(uint8_t x, uint8_t y, char c) {
+void  PCD8544::drawchar(byte x, byte y, char c) {
   if (y >= LCDHEIGHT) return;
   if ((x+5) >= LCDWIDTH) return;
 
-  for (uint8_t i =0; i<5; i++ ) {
-    uint8_t d = pgm_read_byte(font+(c*5)+i);
-    for (uint8_t j = 0; j<8; j++) {
-      if (d & _BV(j)) {
-	my_setpixel(x+i, y+j, textcolor);
-      }
-      else {
-      my_setpixel(x+i, y+j, !textcolor);
-      }
+  for (byte i =0; i<5; i++ ) {
+    byte d = pgm_read_byte(font+(c*5)+i);
+    for (byte j = 0; j<8; j++) {
+      if (d & _BV(j)) my_setpixel(x+i, y+j, textcolor);
+      else my_setpixel(x+i, y+j, !textcolor);
     }
   }
-  for (uint8_t j = 0; j<8; j++) {
-    my_setpixel(x+5, y+j, !textcolor);
-  }
+  for (byte j = 0; j<8; j++) my_setpixel(x+5, y+j, !textcolor);
   updateBoundingBox(x, y, x+5, y + 8);
 }
 
 #if defined(ARDUINO) && ARDUINO >= 100
-  size_t PCD8544::write(uint8_t c) {
+  size_t PCD8544::write(byte c) {
 #else
-  void PCD8544::write(uint8_t c) {
+  void PCD8544::write(byte c) {
 #endif
   if (c == '\n') {
     cursor_y += textsize*8;
@@ -198,35 +174,31 @@ void  PCD8544::drawchar(uint8_t x, uint8_t y, char c) {
   }
 }
 
-void PCD8544::setCursor(uint8_t x, uint8_t y){
+void PCD8544::setCursor(byte x, byte y){
   cursor_x = x; 
   cursor_y = y;
 }
 
-
 // bresenham's algorithm - thx wikpedia
-void PCD8544::drawline(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, 
-		      uint8_t color) {
-  uint8_t steep = abs(y1 - y0) > abs(x1 - x0);
+void PCD8544::drawline(byte x0, byte y0, byte x1, byte y1, byte color) {
+  byte steep = abs(y1 - y0) > abs(x1 - x0);
   if (steep) {
     swap(x0, y0);
     swap(x1, y1);
   }
-
   if (x0 > x1) {
     swap(x0, x1);
     swap(y0, y1);
   }
-
   // much faster to put the test here, since we've already sorted the points
   updateBoundingBox(x0, y0, x1, y1);
 
-  uint8_t dx, dy;
+  byte dx, dy;
   dx = x1 - x0;
   dy = abs(y1 - y0);
 
-  int8_t err = dx / 2;
-  int8_t ystep;
+  byte err = dx / 2;
+  byte ystep;
 
   if (y0 < y1) {
     ystep = 1;
@@ -247,47 +219,41 @@ void PCD8544::drawline(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,
   }
 }
 
-
 // filled rectangle
-void PCD8544::fillrect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, 
-		      uint8_t color) {
+void PCD8544::fillrect(byte x, byte y, byte w, byte h, byte color) {
 
   // stupidest version - just pixels - but fast with internal buffer!
-  for (uint8_t i=x; i<x+w; i++) {
-    for (uint8_t j=y; j<y+h; j++) {
+  for (byte i=x; i<x+w; i++) {
+    for (byte j=y; j<y+h; j++) {
       my_setpixel(i, j, color);
     }
   }
-
   updateBoundingBox(x, y, x+w, y+h);
 }
 
 // draw a rectangle
-void PCD8544::drawrect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, 
-		      uint8_t color) {
+void PCD8544::drawrect(byte x, byte y, byte w, byte h, byte color) {
   // stupidest version - just pixels - but fast with internal buffer!
-  for (uint8_t i=x; i<x+w; i++) {
+  for (byte i=x; i<x+w; i++) {
     my_setpixel(i, y, color);
     my_setpixel(i, y+h-1, color);
   }
-  for (uint8_t i=y; i<y+h; i++) {
+  for (byte i=y; i<y+h; i++) {
     my_setpixel(x, i, color);
     my_setpixel(x+w-1, i, color);
   } 
-
   updateBoundingBox(x, y, x+w, y+h);
 }
 
 // draw a circle outline
-void PCD8544::drawcircle(uint8_t x0, uint8_t y0, uint8_t r, 
-			uint8_t color) {
+void PCD8544::drawcircle(byte x0, byte y0, byte r, byte color) {
   updateBoundingBox(x0-r, y0-r, x0+r, y0+r);
 
-  int8_t f = 1 - r;
-  int8_t ddF_x = 1;
-  int8_t ddF_y = -2 * r;
-  int8_t x = 0;
-  int8_t y = r;
+  byte f = 1 - r;
+  byte ddF_x = 1;
+  byte ddF_y = -2 * r;
+  byte x = 0;
+  byte y = r;
 
   my_setpixel(x0, y0+r, color);
   my_setpixel(x0, y0-r, color);
@@ -312,24 +278,20 @@ void PCD8544::drawcircle(uint8_t x0, uint8_t y0, uint8_t r,
     my_setpixel(x0 + y, y0 + x, color);
     my_setpixel(x0 - y, y0 + x, color);
     my_setpixel(x0 + y, y0 - x, color);
-    my_setpixel(x0 - y, y0 - x, color);
-    
+    my_setpixel(x0 - y, y0 - x, color);    
   }
 }
 
-void PCD8544::fillcircle(uint8_t x0, uint8_t y0, uint8_t r, 
-			uint8_t color) {
+void PCD8544::fillcircle(byte x0, byte y0, byte r, byte color) {
   updateBoundingBox(x0-r, y0-r, x0+r, y0+r);
 
-  int8_t f = 1 - r;
-  int8_t ddF_x = 1;
-  int8_t ddF_y = -2 * r;
-  int8_t x = 0;
-  int8_t y = r;
+  byte f = 1 - r;
+  byte ddF_x = 1;
+  byte ddF_y = -2 * r;
+  byte x = 0;
+  byte y = r;
 
-  for (uint8_t i=y0-r; i<=y0+r; i++) {
-    my_setpixel(x0, i, color);
-  }
+  for (byte i=y0-r; i<=y0+r; i++) my_setpixel(x0, i, color);
 
   while (x<y) {
     if (f >= 0) {
@@ -341,138 +303,91 @@ void PCD8544::fillcircle(uint8_t x0, uint8_t y0, uint8_t r,
     ddF_x += 2;
     f += ddF_x;
   
-    for (uint8_t i=y0-y; i<=y0+y; i++) {
+    for (byte i=y0-y; i<=y0+y; i++) {
       my_setpixel(x0+x, i, color);
       my_setpixel(x0-x, i, color);
     } 
-    for (uint8_t i=y0-x; i<=y0+x; i++) {
+    for (byte i=y0-x; i<=y0+x; i++) {
       my_setpixel(x0+y, i, color);
       my_setpixel(x0-y, i, color);
     }    
   }
 }
 
-
-void PCD8544::my_setpixel(uint8_t x, uint8_t y, uint8_t color) {
-  if ((x >= LCDWIDTH) || (y >= LCDHEIGHT))
-    return;
+void PCD8544::my_setpixel(byte x, byte y, byte color) {
+  if ((x >= LCDWIDTH) || (y >= LCDHEIGHT)) return;
 
   // x is which column
-  if (color) 
-    pcd8544_buffer[x+ (y/8)*LCDWIDTH] |= _BV(y%8);  
-  else
-    pcd8544_buffer[x+ (y/8)*LCDWIDTH] &= ~_BV(y%8); 
+  if (color) pcd8544_buffer[x+ (y/8)*LCDWIDTH] |= _BV(y%8);  
+  else pcd8544_buffer[x+ (y/8)*LCDWIDTH] &= ~_BV(y%8); 
 }
 
-
-
 // the most basic function, set a single pixel
-void PCD8544::setPixel(uint8_t x, uint8_t y, uint8_t color) {
-  if ((x >= LCDWIDTH) || (y >= LCDHEIGHT))
-    return;
+void PCD8544::setPixel(byte x, byte y, byte color) {
+  if ((x >= LCDWIDTH) || (y >= LCDHEIGHT)) return;
 
   // x is which column
-  if (color) 
-    pcd8544_buffer[x+ (y/8)*LCDWIDTH] |= _BV(y%8);  
-  else
-    pcd8544_buffer[x+ (y/8)*LCDWIDTH] &= ~_BV(y%8); 
-
+  if (color) pcd8544_buffer[x+ (y/8)*LCDWIDTH] |= _BV(y%8);  
+  else pcd8544_buffer[x+ (y/8)*LCDWIDTH] &= ~_BV(y%8); 
   updateBoundingBox(x,y,x,y);
 }
 
-
 // the most basic function, get a single pixel
-uint8_t PCD8544::getPixel(uint8_t x, uint8_t y) {
-  if ((x >= LCDWIDTH) || (y >= LCDHEIGHT))
-    return 0;
-
+byte PCD8544::getPixel(byte x, byte y) {
+  if ((x >= LCDWIDTH) || (y >= LCDHEIGHT)) return 0;
   return (pcd8544_buffer[x+ (y/8)*LCDWIDTH] >> (7-(y%8))) & 0x1;  
 }
 
-void PCD8544::init(void) {
-  init(50);
+// initial display line
+// set page address
+// set column address
+// write display data
+
+void PCD8544::displayBuffer()
+{ updateBoundingBox(0, 0, LCDWIDTH-1, LCDHEIGHT-1); // set up a bounding box for screen updates
+  display(); // Push out pcd8544_buffer to the Display (will show the AFI logo)
 }
 
-void PCD8544::init(uint8_t contrast) {
-  // set pin directions
-  pinMode(_din, OUTPUT);
-  pinMode(_sclk, OUTPUT);
-  pinMode(_dc, OUTPUT);
-  pinMode(_rst, OUTPUT);
-  pinMode(_cs, OUTPUT);
-
-  // toggle RST low to reset; CS low so it'll listen to us
-  if (_cs > 0)
-    digitalWrite(_cs, LOW);
-
-  digitalWrite(_rst, LOW);
-  _delay_ms(500);
-  digitalWrite(_rst, HIGH);
-
-
-  // get into the EXTENDED mode!
-  command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION );
-
-  // LCD bias select (4 is optimal?)
-  command(PCD8544_SETBIAS | 0x4);
-
-  // set VOP
-  if (contrast > 0x7f)
-    contrast = 0x7f;
-
-  command( PCD8544_SETVOP | contrast); // Experimentally determined
-
-
-  // normal mode
-  command(PCD8544_FUNCTIONSET);
-
-  // Set display to Normal
-  command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL);
-
-  // initial display line
-  // set page address
-  // set column address
-  // write display data
-
-  // set up a bounding box for screen updates
-
-  updateBoundingBox(0, 0, LCDWIDTH-1, LCDHEIGHT-1);
-  // Push out pcd8544_buffer to the Display (will show the AFI logo)
-  display();
-  _delay_ms(1000);
-  // Clear the display
-  clear(); 
-  display();
-}
-
-inline void PCD8544::spiwrite(uint8_t c) {
+inline void PCD8544::spiwrite(byte c) {
   shiftOut(_din, _sclk, MSBFIRST, c);
 }
 
-void PCD8544::command(uint8_t c) {
+void PCD8544::command(byte c) {
   digitalWrite(_dc, LOW);
   spiwrite(c);
 }
 
-void PCD8544::data(uint8_t c) {
+void PCD8544::data(byte c) {
   digitalWrite(_dc, HIGH);
   spiwrite(c);
 }
 
-void PCD8544::setContrast(uint8_t val) {
-  if (val > 0x7f) {
-    val = 0x7f;
-  }
+void PCD8544::setContrast(char val) {
+  if (val > 0x7f) val = 0x7f; // char can't be > 0x7f
   command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION );
   command( PCD8544_SETVOP | val); 
-  command(PCD8544_FUNCTIONSET);
-  
- }
+  command(PCD8544_FUNCTIONSET);  
+}
 
+// reduces how much is refreshed, which speeds it up!
+// originally derived from Steve Evans/JCW's mod but cleaned up and optimized
+// #define enablePartialUpdate
 
+#ifdef enablePartialUpdate
+static byte xUpdateMin, xUpdateMax, yUpdateMin, yUpdateMax;
+#endif
+
+void PCD8544::updateBoundingBox(byte xmin, byte ymin, byte xmax, byte ymax) {
+#ifdef enablePartialUpdate
+  if (xmin < xUpdateMin) xUpdateMin = xmin;
+  if (xmax > xUpdateMax) xUpdateMax = xmax;
+  if (ymin < yUpdateMin) yUpdateMin = ymin;
+  if (ymax > yUpdateMax) yUpdateMax = ymax;
+#endif
+}
 
 void PCD8544::display(void) {
-  uint8_t col, maxcol, p;
+  byte col, maxcol, p;
   
   for(p = 0; p < 6; p++) {
 #ifdef enablePartialUpdate
@@ -486,7 +401,6 @@ void PCD8544::display(void) {
 #endif
 
     command(PCD8544_SETYADDR | p);
-
 
 #ifdef enablePartialUpdate
     col = xUpdateMin;
@@ -513,7 +427,6 @@ void PCD8544::display(void) {
   yUpdateMin = LCDHEIGHT-1;
   yUpdateMax = 0;
 #endif
-
 }
 
 // clear everything
@@ -527,7 +440,7 @@ void PCD8544::clear(void) {
 // this doesnt touch the buffer, just clears the display RAM - might be handy
 void PCD8544::clearDisplay(void) {
   
-  uint8_t p, c;
+  byte p, c;
   
   for(p = 0; p < 8; p++) {
 
@@ -539,8 +452,6 @@ void PCD8544::clearDisplay(void) {
       st7565_command(CMD_SET_COLUMN_UPPER | ((c >> 4) & 0xf));
       st7565_data(0x0);
     }     
-    }
-
+  }
 }
-
 */
