@@ -196,6 +196,9 @@ void  PCD8544::drawchar(uint8_t x, uint8_t y, char c) {
     if (cursor_y >= LCDHEIGHT) 
       cursor_y = 0;
   }
+#if ARDUINO >= 100
+  return 1;
+#endif
 }
 
 void PCD8544::setCursor(uint8_t x, uint8_t y){
