@@ -1,3 +1,5 @@
+#ifndef PCD8544_H 
+#define PCD8544_H
 /*
 $Id:$
 
@@ -57,7 +59,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 class PCD8544 : public Print {
  public:
-  PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS, int8_t RST);
+  PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS=0, int8_t RST=0); // allow 3, 4 or 5 pin LCD control
   PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST);
 
   void init(uint8_t contrast);
@@ -70,6 +72,7 @@ class PCD8544 : public Print {
   void clearDisplay(void);
   void clear();
   void display();
+  void displayBuffer();
   
   void setPixel(uint8_t x, uint8_t y, uint8_t color);
   uint8_t getPixel(uint8_t x, uint8_t y);
@@ -107,3 +110,5 @@ class PCD8544 : public Print {
 
   void my_setpixel(uint8_t x, uint8_t y, uint8_t color);
 };
+
+#endif
