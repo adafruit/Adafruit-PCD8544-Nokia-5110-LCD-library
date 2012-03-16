@@ -35,9 +35,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Adafruit_PCD8544.h"
 #include "glcdfont.c"
 
-uint8_t is_reversed = 0;
-
-
 // a 5x7 font table
 extern uint8_t PROGMEM font[];
 
@@ -108,8 +105,6 @@ Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS
   constructor(LCDWIDTH, LCDHEIGHT);
 }
 
-
-
 Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST) {
   _din = DIN;
   _sclk = SCLK;
@@ -150,17 +145,26 @@ void Adafruit_PCD8544::begin(uint8_t contrast) {
   pinMode(_din, OUTPUT);
   pinMode(_sclk, OUTPUT);
   pinMode(_dc, OUTPUT);
-  pinMode(_rst, OUTPUT);
-  pinMode(_cs, OUTPUT);
-
-  // toggle RST low to reset; CS low so it'll listen to us
+  if (_rst > 0)
+    pinMode(_rst, OUTPUT);
   if (_cs > 0)
-    digitalWrite(_cs, LOW);
+    pinMode(_cs, OUTPUT);
 
-  digitalWrite(_rst, LOW);
-  _delay_ms(500);
-  digitalWrite(_rst, HIGH);
+  // toggle RST low to reset
+  if (_rst > 0) {
+    digitalWrite(_rst, LOW);
+    _delay_ms(500);
+    digitalWrite(_rst, HIGH);
+  }
 
+  clkport     = portOutputRegister(digitalPinToPort(_sclk));
+  clkpinmask  = digitalPinToBitMask(_sclk);
+  mosiport    = portOutputRegister(digitalPinToPort(_din));
+  mosipinmask = digitalPinToBitMask(_din);
+  csport    = portOutputRegister(digitalPinToPort(_cs));
+  cspinmask = digitalPinToBitMask(_cs);
+  dcport    = portOutputRegister(digitalPinToPort(_dc));
+  dcpinmask = digitalPinToBitMask(_dc);
 
   // get into the EXTENDED mode!
   command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION );
@@ -193,18 +197,37 @@ void Adafruit_PCD8544::begin(uint8_t contrast) {
   display();
 }
 
-inline void Adafruit_PCD8544::spiwrite(uint8_t c) {
+
+inline void Adafruit_PCD8544::fastSPIwrite(uint8_t d) {
+  
+  for(uint8_t bit = 0x80; bit; bit >>= 1) {
+    *clkport &= ~clkpinmask;
+    if(d & bit) *mosiport |=  mosipinmask;
+    else        *mosiport &= ~mosipinmask;
+    *clkport |=  clkpinmask;
+  }
+}
+
+inline void Adafruit_PCD8544::slowSPIwrite(uint8_t c) {
   shiftOut(_din, _sclk, MSBFIRST, c);
 }
 
 void Adafruit_PCD8544::command(uint8_t c) {
   digitalWrite(_dc, LOW);
-  spiwrite(c);
+  if (_cs > 0)
+    digitalWrite(_cs, LOW);
+  fastSPIwrite(c);
+  if (_cs > 0)
+    digitalWrite(_cs, HIGH);
 }
 
 void Adafruit_PCD8544::data(uint8_t c) {
   digitalWrite(_dc, HIGH);
-  spiwrite(c);
+  if (_cs > 0)
+    digitalWrite(_cs, LOW);
+  fastSPIwrite(c);
+  if (_cs > 0)
+    digitalWrite(_cs, HIGH);
 }
 
 void Adafruit_PCD8544::setContrast(uint8_t val) {
@@ -247,11 +270,17 @@ void Adafruit_PCD8544::display(void) {
 
     command(PCD8544_SETXADDR | col);
 
+    digitalWrite(_dc, HIGH);
+    if (_cs > 0)
+      digitalWrite(_cs, LOW);
     for(; col <= maxcol; col++) {
       //uart_putw_dec(col);
       //uart_putchar(' ');
-      data(pcd8544_buffer[(LCDWIDTH*p)+col]);
+      fastSPIwrite(pcd8544_buffer[(LCDWIDTH*p)+col]);
     }
+    if (_cs > 0)
+      digitalWrite(_cs, HIGH);
+
   }
 
   command(PCD8544_SETYADDR );  // no idea why this is necessary but it is to finish the last byte?
