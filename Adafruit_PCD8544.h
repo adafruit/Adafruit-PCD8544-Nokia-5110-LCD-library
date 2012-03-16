@@ -1,25 +1,20 @@
-/*
-$Id:$
+/*********************************************************************
+This is a library for our Monochrome Nokia 5110 LCD Displays
 
-PCD8544 LCD library!
+  Pick one up today in the adafruit shop!
+  ------> http://www.adafruit.com/products/338
 
-Copyright (C) 2010 Limor Fried, Adafruit Industries
+These displays use SPI to communicate, 4 or 5 pins are required to  
+interface
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+Adafruit invests time and resources providing this open source code, 
+please support Adafruit and open-source hardware by purchasing 
+products from Adafruit!
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
-*/
+Written by Limor Fried/Ladyada  for Adafruit Industries.  
+BSD license, check license.txt for more information
+All text above, and the splash screen must be included in any redistribution
+*********************************************************************/
 
 #if defined(ARDUINO) && ARDUINO >= 100
   #include "Arduino.h"
