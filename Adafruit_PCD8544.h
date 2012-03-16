@@ -55,55 +55,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #define swap(a, b) { uint8_t t = a; a = b; b = t; }
 
-class PCD8544 : public Print {
+class Adafruit_PCD8544 : public Adafruit_GFX {
  public:
-  PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS, int8_t RST);
-  PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST);
+  Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS, int8_t RST);
+  Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST);
 
-  void init(uint8_t contrast);
-  void init(void);
+  void begin(uint8_t contrast = 40);
   
   void command(uint8_t c);
   void data(uint8_t c);
   
   void setContrast(uint8_t val);
   void clearDisplay(void);
-  void clear();
   void display();
   
-  void setPixel(uint8_t x, uint8_t y, uint8_t color);
+  void drawPixel(uint16_t x, uint16_t y, uint16_t color);
   uint8_t getPixel(uint8_t x, uint8_t y);
-  void fillcircle(uint8_t x0, uint8_t y0, uint8_t r, 
-		  uint8_t color);
-  void drawcircle(uint8_t x0, uint8_t y0, uint8_t r, 
-		  uint8_t color);
-  void drawrect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, 
-		uint8_t color);
-  void fillrect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, 
-		uint8_t color);
-  void drawline(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, 
-		uint8_t color);
-  
-  void setCursor(uint8_t x, uint8_t y);
-  void setTextSize(uint8_t s);
-  void setTextColor(uint8_t c);
-  #if defined(ARDUINO) && ARDUINO >= 100
-    size_t write(uint8_t c);
-  #else
-    void write(uint8_t c);
-  #endif
-
-  void drawchar(uint8_t x, uint8_t line, char c);
-  void drawstring(uint8_t x, uint8_t line, char *c);
-  void drawstring_P(uint8_t x, uint8_t line, const char *c);
-  void drawbitmap(uint8_t x, uint8_t y, 
-		  const uint8_t *bitmap, uint8_t w, uint8_t h,
-		  uint8_t color);
 
  private:
-  uint8_t cursor_x, cursor_y, textsize, textcolor;
   int8_t _din, _sclk, _dc, _rst, _cs;
   void spiwrite(uint8_t c);
-
-  void my_setpixel(uint8_t x, uint8_t y, uint8_t color);
 };

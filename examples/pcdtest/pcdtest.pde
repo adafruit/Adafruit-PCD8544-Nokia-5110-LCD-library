@@ -1,101 +1,131 @@
-#include "PCD8544.h"
+#include <Adafruit_GFX.h>
+#include <Adafruit_PCD8544.h>
 
 // pin 7 - Serial clock out (SCLK)
 // pin 6 - Serial data out (DIN)
 // pin 5 - Data/Command select (D/C)
 // pin 4 - LCD chip select (CS)
 // pin 3 - LCD reset (RST)
-PCD8544 nokia = PCD8544(7, 6, 5, 4, 3);
+Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
 
-// a bitmap of a 16x16 fruit icon
+#define NUMFLAKES 10
+#define XPOS 0
+#define YPOS 1
+#define DELTAY 2
+
+
+#define LOGO16_GLCD_HEIGHT 16 
+#define LOGO16_GLCD_WIDTH  16 
 static unsigned char __attribute__ ((progmem)) logo16_glcd_bmp[]={
 0x30, 0xf0, 0xf0, 0xf0, 0xf0, 0x30, 0xf8, 0xbe, 0x9f, 0xff, 0xf8, 0xc0, 0xc0, 0xc0, 0x80, 0x00, 
 0x20, 0x3c, 0x3f, 0x3f, 0x1f, 0x19, 0x1f, 0x7b, 0xfb, 0xfe, 0xfe, 0x07, 0x07, 0x07, 0x03, 0x00, };
-#define LOGO16_GLCD_HEIGHT 16 
-#define LOGO16_GLCD_WIDTH  16 
 
-void setup(void) {
-  
+
+void setup()   {                
   Serial.begin(9600);
   
-  Serial.println("hello!");
-
-  nokia.init();
+  display.begin();
+  // init done
+  
   // you can change the contrast around to adapt the display
   // for the best viewing!
-  nokia.setContrast(40);
-  // turn all the pixels on (a handy test)
-  nokia.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYALLON);
-  delay(500);
-  // back to normal
-  nokia.command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL);
+  display.setContrast(40);
 
-  // show splashscreen
-  nokia.display();
-  //delay(2000);
-  nokia.clear();
+  display.display(); // show splashscreen
+  delay(2000);
+  display.clearDisplay();   // clears the screen and buffer
 
   // draw a single pixel
-  nokia.setPixel(10, 10, BLACK);
-  nokia.display();        // show the changes to the buffer
+  display.drawPixel(10, 10, BLACK);
+  display.display();
   delay(2000);
-  nokia.clear();
- 
-   // draw many lines
+  display.clearDisplay();
+
+  // draw many lines
   testdrawline();
-  nokia.display();       // show the lines
- // nokia.clear();
-  
+  display.display();
+  delay(2000);
+  display.clearDisplay();
+
   // draw rectangles
   testdrawrect();
-  nokia.display();
+  display.display();
   delay(2000);
-  nokia.clear();
-  
+  display.clearDisplay();
+
   // draw multiple rectangles
   testfillrect();
-  nokia.display();
+  display.display();
   delay(2000);
-  nokia.clear();
-  
+  display.clearDisplay();
+
   // draw mulitple circles
   testdrawcircle();
-  nokia.display();
+  display.display();
   delay(2000);
-  nokia.clear();
-  
-  // draw the first ~120 characters in the font
+  display.clearDisplay();
+
+  // draw a circle, 10 pixel radius
+  display.fillCircle(display.width()/2, display.height()/2, 10, BLACK);
+  display.display();
+  delay(2000);
+  display.clearDisplay();
+
+  testdrawroundrect();
+  delay(2000);
+  display.clearDisplay();
+
+  testfillroundrect();
+  delay(2000);
+  display.clearDisplay();
+
+  testdrawtriangle();
+  delay(2000);
+  display.clearDisplay();
+   
+  testfilltriangle();
+  delay(2000);
+  display.clearDisplay();
+
+  // draw the first ~12 characters in the font
   testdrawchar();
-  nokia.display();
+  display.display();
   delay(2000);
-  nokia.clear();
+  display.clearDisplay();
 
-  // draw a string at location (0,0)
-  nokia.setCursor(0, 0);
-  nokia.print("Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor");
-  nokia.display();
+  // text display tests
+  display.setTextSize(1);
+  display.setTextColor(BLACK);
+  display.setCursor(0,0);
+  display.println("Hello, world!");
+  display.setTextColor(WHITE, BLACK); // 'inverted' text
+  display.println(3.141592);
+  display.setTextSize(2);
+  display.setTextColor(BLACK);
+  display.print("0x"); display.println(0xDEADBEEF, HEX);
+  display.display();
   delay(2000);
-  nokia.clear();
 
-  // draw other characters, variables and such
-  nokia.setCursor(0, 20);
-  nokia.println(0xAB, HEX);
-  nokia.print(99.99);
-  nokia.println('%');
-  nokia.display();
-  delay(2000);
-  nokia.clear();
-  
+  // miniature bitmap display
+  display.clearDisplay();
+  display.drawBitmap(30, 16,  logo16_glcd_bmp, 16, 16, 1);
+  display.display();
+
+  // invert the display
+  display.invertDisplay(true);
+  delay(1000); 
+  display.invertDisplay(false);
+  delay(1000); 
+
   // draw a bitmap icon and 'animate' movement
   testdrawbitmap(logo16_glcd_bmp, LOGO16_GLCD_HEIGHT, LOGO16_GLCD_WIDTH);
 }
 
-void loop(void) {}
 
-#define NUMFLAKES 8
-#define XPOS 0
-#define YPOS 1
-#define DELTAY 2
+void loop() {
+  
+}
+
 
 void testdrawbitmap(const uint8_t *bitmap, uint8_t w, uint8_t h) {
   uint8_t icons[NUMFLAKES][3];
@@ -103,79 +133,159 @@ void testdrawbitmap(const uint8_t *bitmap, uint8_t w, uint8_t h) {
  
   // initialize
   for (uint8_t f=0; f< NUMFLAKES; f++) {
-    icons[f][XPOS] = random() % LCDWIDTH;
+    icons[f][XPOS] = random() % display.width();
     icons[f][YPOS] = 0;
     icons[f][DELTAY] = random() % 5 + 1;
+    
+    Serial.print("x: ");
+    Serial.print(icons[f][XPOS], DEC);
+    Serial.print(" y: ");
+    Serial.print(icons[f][YPOS], DEC);
+    Serial.print(" dy: ");
+    Serial.println(icons[f][DELTAY], DEC);
   }
 
   while (1) {
     // draw each icon
     for (uint8_t f=0; f< NUMFLAKES; f++) {
-      nokia.drawbitmap(icons[f][XPOS], icons[f][YPOS], logo16_glcd_bmp, w, h, BLACK);
+      display.drawBitmap(icons[f][XPOS], icons[f][YPOS], logo16_glcd_bmp, w, h, BLACK);
     }
-    nokia.display();
+    display.display();
     delay(200);
     
     // then erase it + move it
     for (uint8_t f=0; f< NUMFLAKES; f++) {
-      nokia.drawbitmap(icons[f][XPOS], icons[f][YPOS],  logo16_glcd_bmp, w, h, 0);
+      display.drawBitmap(icons[f][XPOS], icons[f][YPOS],  logo16_glcd_bmp, w, h, WHITE);
       // move it
       icons[f][YPOS] += icons[f][DELTAY];
       // if its gone, reinit
-      if (icons[f][YPOS] > LCDHEIGHT) {
-	icons[f][XPOS] = random() % LCDWIDTH;
+      if (icons[f][YPOS] > display.height()) {
+	icons[f][XPOS] = random() % display.width();
 	icons[f][YPOS] = 0;
 	icons[f][DELTAY] = random() % 5 + 1;
       }
     }
-  }
+   }
 }
 
+
 void testdrawchar(void) {
-  for (uint8_t i=0; i < 64; i++) {
-    nokia.drawchar((i % 14) * 6, (i/14) * 8, i);
+  display.setTextSize(1);
+  display.setTextColor(BLACK);
+  display.setCursor(0,0);
+
+  for (uint8_t i=0; i < 168; i++) {
+    if (i == '\n') continue;
+    display.write(i);
+    //if ((i > 0) && (i % 14 == 0))
+      //display.println();
   }    
-  nokia.display();
-  delay(2000);
-  for (uint8_t i=0; i < 64; i++) {
-    nokia.drawchar((i % 14) * 6, (i/14) * 8, i + 64);
-  }    
+  display.display();
 }
 
 void testdrawcircle(void) {
-  for (uint8_t i=0; i<48; i+=2) {
-    nokia.drawcircle(41, 23, i, BLACK);
-  }
-}
-
-
-void testdrawrect(void) {
-  for (uint8_t i=0; i<48; i+=2) {
-    nokia.drawrect(i, i, 96-i, 48-i, BLACK);
+  for (uint8_t i=0; i<display.height(); i+=2) {
+    display.drawCircle(display.width()/2, display.height()/2, i, BLACK);
+    display.display();
   }
 }
 
 void testfillrect(void) {
-  for (uint8_t i=0; i<48; i++) {
-      // alternate colors for moire effect
-    nokia.fillrect(i, i, 84-i, 48-i, i%2);
+  uint8_t color = 1;
+  for (uint8_t i=0; i<display.height()/2; i+=3) {
+    // alternate colors
+    display.fillRect(i, i, display.width()-i*2, display.height()-i*2, color%2);
+    display.display();
+    color++;
   }
 }
 
-void testdrawline() {
-  for (uint8_t i=0; i<84; i+=4) {
-    nokia.drawline(0, 0, i, 47, BLACK);
+void testdrawtriangle(void) {
+  for (uint16_t i=0; i<min(display.width(),display.height())/2; i+=5) {
+    display.drawTriangle(display.width()/2, display.height()/2-i,
+                     display.width()/2-i, display.height()/2+i,
+                     display.width()/2+i, display.height()/2+i, BLACK);
+    display.display();
   }
-  for (uint8_t i=0; i<48; i+=4) {
-    nokia.drawline(0, 0, 83, i, BLACK);
-  }
+}
 
-  nokia.display();
-  delay(1000);
-  for (uint8_t i=0; i<84; i+=4) {
-    nokia.drawline(i, 47, 0, 0, WHITE);
+void testfilltriangle(void) {
+  uint8_t color = BLACK;
+  for (int16_t i=min(display.width(),display.height())/2; i>0; i-=5) {
+    display.fillTriangle(display.width()/2, display.height()/2-i,
+                     display.width()/2-i, display.height()/2+i,
+                     display.width()/2+i, display.height()/2+i, color);
+    if (color == WHITE) color = BLACK;
+    else color = WHITE;
+    display.display();
   }
-  for (uint8_t i=0; i<48; i+=4) {
-    nokia.drawline(83, i, 0, 0, WHITE);
+}
+
+void testdrawroundrect(void) {
+  for (uint8_t i=0; i<display.height()/2-2; i+=2) {
+    display.drawRoundRect(i, i, display.width()-2*i, display.height()-2*i, display.height()/4, BLACK);
+    display.display();
   }
+}
+
+void testfillroundrect(void) {
+  uint8_t color = BLACK;
+  for (uint8_t i=0; i<display.height()/2-2; i+=2) {
+    display.fillRoundRect(i, i, display.width()-2*i, display.height()-2*i, display.height()/4, color);
+    if (color == WHITE) color = BLACK;
+    else color = WHITE;
+    display.display();
+  }
+}
+   
+void testdrawrect(void) {
+  for (uint8_t i=0; i<display.height()/2; i+=2) {
+    display.drawRect(i, i, display.width()-2*i, display.height()-2*i, BLACK);
+    display.display();
+  }
+}
+
+void testdrawline() {  
+  for (uint8_t i=0; i<display.width(); i+=4) {
+    display.drawLine(0, 0, i, display.height()-1, BLACK);
+    display.display();
+  }
+  for (uint8_t i=0; i<display.height(); i+=4) {
+    display.drawLine(0, 0, display.width()-1, i, BLACK);
+    display.display();
+  }
+  delay(250);
+  
+  display.clearDisplay();
+  for (uint8_t i=0; i<display.width(); i+=4) {
+    display.drawLine(0, display.height()-1, i, 0, BLACK);
+    display.display();
+  }
+  for (int8_t i=display.height()-1; i>=0; i-=4) {
+    display.drawLine(0, display.height()-1, display.width()-1, i, BLACK);
+    display.display();
+  }
+  delay(250);
+  
+  display.clearDisplay();
+  for (int8_t i=display.width()-1; i>=0; i-=4) {
+    display.drawLine(display.width()-1, display.height()-1, i, 0, BLACK);
+    display.display();
+  }
+  for (int8_t i=display.height()-1; i>=0; i-=4) {
+    display.drawLine(display.width()-1, display.height()-1, 0, i, BLACK);
+    display.display();
+  }
+  delay(250);
+
+  display.clearDisplay();
+  for (uint8_t i=0; i<display.height(); i+=4) {
+    display.drawLine(display.width()-1, 0, 0, i, BLACK);
+    display.display();
+  }
+  for (uint8_t i=0; i<display.width(); i+=4) {
+    display.drawLine(display.width()-1, 0, i, display.height()-1, BLACK); 
+    display.display();
+  }
+  delay(250);
 }
