@@ -48,8 +48,6 @@ All text above, and the splash screen must be included in any redistribution
 #define PCD8544_SETBIAS 0x10
 #define PCD8544_SETVOP 0x80
 
-#define swap(a, b) { uint8_t t = a; a = b; b = t; }
-
 class Adafruit_PCD8544 : public Adafruit_GFX {
  public:
   Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS, int8_t RST);
@@ -64,8 +62,8 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
   void clearDisplay(void);
   void display();
   
-  void drawPixel(uint16_t x, uint16_t y, uint16_t color);
-  uint8_t getPixel(uint8_t x, uint8_t y);
+  void drawPixel(int16_t x, int16_t y, uint16_t color);
+  uint8_t getPixel(int8_t x, int8_t y);
 
  private:
   int8_t _din, _sclk, _dc, _rst, _cs;

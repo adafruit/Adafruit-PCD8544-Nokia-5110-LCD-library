@@ -112,8 +112,8 @@ Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RS
 
 
 // the most basic function, set a single pixel
-void Adafruit_PCD8544::drawPixel(uint16_t x, uint16_t y, uint16_t color) {
-  if ((x >= LCDWIDTH) || (y >= LCDHEIGHT))
+void Adafruit_PCD8544::drawPixel(int16_t x, int16_t y, uint16_t color) {
+  if ((x < 0) || (x >= LCDWIDTH) || (y < 0) || (y >= LCDHEIGHT))
     return;
 
   // x is which column
@@ -127,8 +127,8 @@ void Adafruit_PCD8544::drawPixel(uint16_t x, uint16_t y, uint16_t color) {
 
 
 // the most basic function, get a single pixel
-uint8_t Adafruit_PCD8544::getPixel(uint8_t x, uint8_t y) {
-  if ((x >= LCDWIDTH) || (y >= LCDHEIGHT))
+uint8_t Adafruit_PCD8544::getPixel(int8_t x, int8_t y) {
+  if ((x < 0) || (x >= LCDWIDTH) || (y < 0) || (y >= LCDHEIGHT))
     return 0;
 
   return (pcd8544_buffer[x+ (y/8)*LCDWIDTH] >> (7-(y%8))) & 0x1;  
