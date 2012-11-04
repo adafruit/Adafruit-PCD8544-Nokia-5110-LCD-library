@@ -20,6 +20,7 @@ All text above, and the splash screen must be included in any redistribution
   #include "Arduino.h"
 #else
   #include "WProgram.h"
+  #include "pins_arduino.h"
 #endif
 
 #define BLACK 1
