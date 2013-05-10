@@ -31,7 +31,7 @@ All text above, and the splash screen below must be included in any redistributi
 #include "glcdfont.c"
 
 // a 5x7 font table
-extern uint8_t PROGMEM font[];
+extern const uint8_t PROGMEM font[];
 
 // the memory buffer for the LCD
 uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
@@ -90,22 +90,24 @@ static void updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax, uint8_t 
 #endif
 }
 
-Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS, int8_t RST) {
+Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS, int8_t RST, int8_t LED) {
   _din = DIN;
   _sclk = SCLK;
   _dc = DC;
   _rst = RST;
   _cs = CS;
+  _led = LED;
 
   constructor(LCDWIDTH, LCDHEIGHT);
 }
 
-Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST) {
+Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST, int8_t LED) {
   _din = DIN;
   _sclk = SCLK;
   _dc = DC;
   _rst = RST;
   _cs = -1;
+  _led = LED;
 
   constructor(LCDWIDTH, LCDHEIGHT);
 }
@@ -140,10 +142,14 @@ void Adafruit_PCD8544::begin(uint8_t contrast) {
   pinMode(_din, OUTPUT);
   pinMode(_sclk, OUTPUT);
   pinMode(_dc, OUTPUT);
+  pinMode(_led, OUTPUT);
   if (_rst > 0)
     pinMode(_rst, OUTPUT);
   if (_cs > 0)
     pinMode(_cs, OUTPUT);
+
+  // turn on backlight maximum brightness
+  analogWrite(_led, 0x100);
 
   // toggle RST low to reset
   if (_rst > 0) {

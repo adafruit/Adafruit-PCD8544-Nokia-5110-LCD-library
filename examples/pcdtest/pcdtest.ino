@@ -24,7 +24,8 @@ All text above, and the splash screen must be included in any redistribution
 // pin 5 - Data/Command select (D/C)
 // pin 4 - LCD chip select (CS)
 // pin 3 - LCD reset (RST)
-Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
+// pin 11 - Backlight (LED)
+Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3, 11);
 
 #define NUMFLAKES 10
 #define XPOS 0
@@ -35,7 +36,7 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
 #define LOGO16_GLCD_HEIGHT 16
 #define LOGO16_GLCD_WIDTH  16
 
-static unsigned char PROGMEM logo16_glcd_bmp[] =
+static const unsigned char PROGMEM logo16_glcd_bmp[] =
 { B00000000, B11000000,
   B00000001, B11000000,
   B00000001, B11000000,
@@ -61,7 +62,7 @@ void setup()   {
 
   // you can change the contrast around to adapt the display
   // for the best viewing!
-  display.setContrast(50);
+  display.setContrast(191);
 
   display.display(); // show splashscreen
   delay(2000);

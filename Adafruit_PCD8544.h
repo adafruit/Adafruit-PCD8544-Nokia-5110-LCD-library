@@ -51,8 +51,8 @@ All text above, and the splash screen must be included in any redistribution
 
 class Adafruit_PCD8544 : public Adafruit_GFX {
  public:
-  Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS, int8_t RST);
-  Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST);
+  Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS, int8_t RST, int8_t LED);
+  Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST, int8_t LED);
 
   void begin(uint8_t contrast = 40);
   
@@ -67,7 +67,7 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
   uint8_t getPixel(int8_t x, int8_t y);
 
  private:
-  int8_t _din, _sclk, _dc, _rst, _cs;
+  int8_t _din, _sclk, _dc, _rst, _cs, _led;
   volatile uint8_t *mosiport, *clkport, *csport, *dcport;
   uint8_t mosipinmask, clkpinmask, cspinmask, dcpinmask;
 
