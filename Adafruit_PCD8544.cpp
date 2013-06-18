@@ -28,10 +28,6 @@ All text above, and the splash screen below must be included in any redistributi
 
 #include <Adafruit_GFX.h>
 #include "Adafruit_PCD8544.h"
-#include "glcdfont.c"
-
-// a 5x7 font table
-extern uint8_t PROGMEM font[];
 
 // the memory buffer for the LCD
 uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
