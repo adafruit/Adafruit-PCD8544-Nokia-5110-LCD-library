@@ -121,6 +121,25 @@ void Adafruit_PCD8544::drawPixel(int16_t x, int16_t y, uint16_t color) {
   updateBoundingBox(x,y,x,y);
 }
 
+// draws an 1 bit xbm to the buffer
+void Adafruit_PCD8544::drawXbm(int16_t x_off, int16_t y_off, unsigned char *xbm, int16_t w, int16_t h, bool inverted) {
+    int16_t row, col, byo, bmo;
+
+    int8_t yes = inverted ? 0 : 1;
+    int8_t no  = inverted ? 1 : 0;
+
+    for (row = 0; row < h; row += 7) {
+        for (col = 0; col < w; col++) {
+            int y = 7;
+            while (y > 0) {
+                byo = ((row + y) * ((w + 7) / 8)) + (col / 8);
+                bmo = 1 << (col % 8);
+                drawPixel(col + x_off, (row + y + y_off) - 1, ((xbm[byo] & bmo) ? yes : no));
+                y--;
+            }
+        }
+    }
+}
 
 // the most basic function, get a single pixel
 uint8_t Adafruit_PCD8544::getPixel(int8_t x, int8_t y) {
