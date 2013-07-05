@@ -86,24 +86,22 @@ static void updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax, uint8_t 
 #endif
 }
 
-Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS, int8_t RST) {
+Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC,
+    int8_t CS, int8_t RST) : Adafruit_GFX(LCDWIDTH, LCDHEIGHT) {
   _din = DIN;
   _sclk = SCLK;
   _dc = DC;
   _rst = RST;
   _cs = CS;
-
-  constructor(LCDWIDTH, LCDHEIGHT);
 }
 
-Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST) {
+Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC,
+    int8_t RST) : Adafruit_GFX(LCDWIDTH, LCDHEIGHT) {
   _din = DIN;
   _sclk = SCLK;
   _dc = DC;
   _rst = RST;
   _cs = -1;
-
-  constructor(LCDWIDTH, LCDHEIGHT);
 }
 
 
