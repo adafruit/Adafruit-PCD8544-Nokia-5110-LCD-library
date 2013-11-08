@@ -242,7 +242,7 @@ void Adafruit_PCD8544::display(void) {
     }
     if (yUpdateMax < p*8) {
       break;
-    }d
+    }
 #endif
 
     command(PCD8544_SETYADDR | p);
