@@ -18,13 +18,14 @@ All text above, and the splash screen must be included in any redistribution
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
+#include <SPI.h>
 
-// pin 7 - Serial clock out (SCLK)
-// pin 6 - Serial data out (DIN)
-// pin 5 - Data/Command select (D/C)
-// pin 4 - LCD chip select (CS)
-// pin 3 - LCD reset (RST)
-Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
+// new sytax for hardware SPI
+// Nano:  13  SCLK
+//        11  DIN/MOSI
+//        10  CS/SS
+// Adafruit_PCD8544(uint8_t CS, uint8_t RS, uint8_t RST);
+Adafruit_PCD8544 display = Adafruit_PCD8544(10, 5, 3);
 
 #define NUMFLAKES 10
 #define XPOS 0
@@ -192,12 +193,12 @@ void testdrawbitmap(const uint8_t *bitmap, uint8_t w, uint8_t h) {
       icons[f][YPOS] += icons[f][DELTAY];
       // if its gone, reinit
       if (icons[f][YPOS] > display.height()) {
-	icons[f][XPOS] = random() % display.width();
-	icons[f][YPOS] = 0;
-	icons[f][DELTAY] = random() % 5 + 1;
+		icons[f][XPOS] = random() % display.width();
+		icons[f][YPOS] = 0;
+		icons[f][DELTAY] = random() % 5 + 1;
       }
     }
-   }
+  }
 }
 
 
