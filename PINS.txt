@@ -1,0 +1,41 @@
+Copyright (c) 2013 Andreas Götz <cpuidle@gmx.de>
+BSD license, check license.txt for more information
+All text above must be included in any redistribution
+
+
+With this update, the pin naming and order has changed to match the Adafruit ST7735 library.
+The old/new pin naming and constructor order ist provided below for reference as well as the
+internal usage
+
+
+PIN naming
+
+  OLD           NEW             SPI library*  Internal usage
+
+  int8_t CS     uint8_t CS      --            Chip select (csport/cspinmask)
+  int8_t DC     uint8_t RS      --            Data/command (dc/rs port/pinmask)
+  int8_t DIN    uint8_t SID     MOSI (11)     Device data in, Master out (mosiport/dataport)
+  int8_t SCLK   uint8_t SCLK    SCK (13)      Clock (clkport/clkpinmask)
+  int8_t RST    uint8_t RST     --            Reset (rsport/rspinmask)
+  --            --              MISO (12)     Master in slave out (not used for display)
+  --            --              SS (10)       Slave select**
+  
+  *Note: SPI library pin numbers are given for Arduino Nano
+
+  **Note about Slave Select (SS) pin on AVR based boards:
+  All AVR based boards have an SS pin that is useful when they act as a slave controlled by an external master. Since this library supports only master mode, this pin should be set always as OUTPUT otherwise the SPI interface could be put automatically into slave mode by hardware, rendering the library inoperative. (http://arduino.cc/de/Reference/SPI)
+
+
+Constructor usage
+
+  OLD
+        // bitbang SPI
+        Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS, int8_t RST);
+        // bitbang SPI, caller responsible for chip select
+        Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST);
+
+  NEW
+        // bitbang SPI
+        Adafruit_PCD8544(uint8_t CS, uint8_t RS, uint8_t SID, uint8_t SCLK, uint8_t RST);
+        // hardware SPI
+        Adafruit_PCD8544(uint8_t CS, uint8_t RS, uint8_t RST);
