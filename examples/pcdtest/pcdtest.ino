@@ -35,7 +35,7 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
 #define LOGO16_GLCD_HEIGHT 16
 #define LOGO16_GLCD_WIDTH  16
 
-static unsigned char PROGMEM logo16_glcd_bmp[] =
+static const unsigned char PROGMEM logo16_glcd_bmp[] =
 { B00000000, B11000000,
   B00000001, B11000000,
   B00000001, B11000000,
