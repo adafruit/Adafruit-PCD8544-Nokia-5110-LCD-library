@@ -15,6 +15,8 @@ Written by Limor Fried/Ladyada  for Adafruit Industries.
 BSD license, check license.txt for more information
 All text above, and the splash screen must be included in any redistribution
 *********************************************************************/
+#ifndef _ADAFRUIT_PCD8544_H
+#define _ADAFRUIT_PCD8544_H
 
 #if defined(ARDUINO) && ARDUINO >= 100
   #include "Arduino.h"
@@ -74,3 +76,5 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
   void slowSPIwrite(uint8_t c);
   void fastSPIwrite(uint8_t c);
 };
+
+#endif
