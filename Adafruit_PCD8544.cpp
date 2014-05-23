@@ -107,6 +107,27 @@ Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC,
 
 // the most basic function, set a single pixel
 void Adafruit_PCD8544::drawPixel(int16_t x, int16_t y, uint16_t color) {
+  if ((x < 0) || (x >= _width) || (y < 0) || (y >= _height))
+    return;
+
+  int16_t t;
+  switch(rotation){
+    case 1:
+      t = x;
+      x = y;
+      y =  LCDHEIGHT - 1 - t;
+      break;
+    case 2:
+      x = LCDWIDTH - 1 - x;
+      y = LCDHEIGHT - 1 - y;
+      break;
+    case 3:
+      t = x;
+      x = LCDWIDTH - 1 - y;
+      y = t;
+      break;
+  }
+
   if ((x < 0) || (x >= LCDWIDTH) || (y < 0) || (y >= LCDHEIGHT))
     return;
 
