@@ -81,7 +81,6 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
 
  private:
   int8_t _din, _sclk, _dc, _rst, _cs;
-  uint8_t _spiClockDiv;
   volatile uint8_t *mosiport, *clkport;
   uint8_t mosipinmask, clkpinmask;
 
