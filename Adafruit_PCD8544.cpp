@@ -104,6 +104,16 @@ Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC,
   _cs = -1;
 }
 
+Adafruit_PCD8544::Adafruit_PCD8544(int8_t DC, int8_t CS, int8_t RST):
+  Adafruit_GFX(LCDWIDTH, LCDHEIGHT) {
+  // -1 for din and sclk specify using hardware SPI
+  _din = -1;
+  _sclk = -1;
+  _dc = DC;
+  _rst = RST;
+  _cs = CS;
+}
+
 
 // the most basic function, set a single pixel
 void Adafruit_PCD8544::drawPixel(int16_t x, int16_t y, uint16_t color) {
@@ -151,14 +161,33 @@ uint8_t Adafruit_PCD8544::getPixel(int8_t x, int8_t y) {
 
 
 void Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
-  // set pin directions
-  pinMode(_din, OUTPUT);
-  pinMode(_sclk, OUTPUT);
+  if (isHardwareSPI()) {
+    // Setup hardware SPI.
+    SPI.begin();
+    SPI.setClockDivider(PCD8544_SPI_CLOCK_DIV);
+    SPI.setDataMode(SPI_MODE0);
+    SPI.setBitOrder(MSBFIRST);
+  }
+  else {
+    // Setup software SPI.
+
+    // Set software SPI specific pin outputs.
+    pinMode(_din, OUTPUT);
+    pinMode(_sclk, OUTPUT);
+
+    // Set software SPI ports and masks.
+    clkport     = portOutputRegister(digitalPinToPort(_sclk));
+    clkpinmask  = digitalPinToBitMask(_sclk);
+    mosiport    = portOutputRegister(digitalPinToPort(_din));
+    mosipinmask = digitalPinToBitMask(_din);
+  }
+
+  // Set common pin outputs.
   pinMode(_dc, OUTPUT);
   if (_rst > 0)
-    pinMode(_rst, OUTPUT);
+      pinMode(_rst, OUTPUT);
   if (_cs > 0)
-    pinMode(_cs, OUTPUT);
+      pinMode(_cs, OUTPUT);
 
   // toggle RST low to reset
   if (_rst > 0) {
@@ -166,15 +195,6 @@ void Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
     _delay_ms(500);
     digitalWrite(_rst, HIGH);
   }
-
-  clkport     = portOutputRegister(digitalPinToPort(_sclk));
-  clkpinmask  = digitalPinToBitMask(_sclk);
-  mosiport    = portOutputRegister(digitalPinToPort(_din));
-  mosipinmask = digitalPinToBitMask(_din);
-  csport    = portOutputRegister(digitalPinToPort(_cs));
-  cspinmask = digitalPinToBitMask(_cs);
-  dcport    = portOutputRegister(digitalPinToPort(_dc));
-  dcpinmask = digitalPinToBitMask(_dc);
 
   // get into the EXTENDED mode!
   command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION );
@@ -208,21 +228,31 @@ void Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
 }
 
 
-inline void Adafruit_PCD8544::fastSPIwrite(uint8_t d) {
-  
-  for(uint8_t bit = 0x80; bit; bit >>= 1) {
-    *clkport &= ~clkpinmask;
-    if(d & bit) *mosiport |=  mosipinmask;
-    else        *mosiport &= ~mosipinmask;
-    *clkport |=  clkpinmask;
+inline void Adafruit_PCD8544::spiWrite(uint8_t d) {
+  if (isHardwareSPI()) {
+    // Hardware SPI write.
+    SPI.transfer(d);
   }
+  else {
+    // Software SPI write with bit banging.
+    for(uint8_t bit = 0x80; bit; bit >>= 1) {
+      *clkport &= ~clkpinmask;
+      if(d & bit) *mosiport |=  mosipinmask;
+      else        *mosiport &= ~mosipinmask;
+      *clkport |=  clkpinmask;
+    }
+  }
+}
+
+bool Adafruit_PCD8544::isHardwareSPI() {
+  return (_din == -1 && _sclk == -1);
 }
 
 void Adafruit_PCD8544::command(uint8_t c) {
   digitalWrite(_dc, LOW);
   if (_cs > 0)
     digitalWrite(_cs, LOW);
-  fastSPIwrite(c);
+  spiWrite(c);
   if (_cs > 0)
     digitalWrite(_cs, HIGH);
 }
@@ -231,7 +261,7 @@ void Adafruit_PCD8544::data(uint8_t c) {
   digitalWrite(_dc, HIGH);
   if (_cs > 0)
     digitalWrite(_cs, LOW);
-  fastSPIwrite(c);
+  spiWrite(c);
   if (_cs > 0)
     digitalWrite(_cs, HIGH);
 }
@@ -280,9 +310,7 @@ void Adafruit_PCD8544::display(void) {
     if (_cs > 0)
       digitalWrite(_cs, LOW);
     for(; col <= maxcol; col++) {
-      //uart_putw_dec(col);
-      //uart_putchar(' ');
-      fastSPIwrite(pcd8544_buffer[(LCDWIDTH*p)+col]);
+      spiWrite(pcd8544_buffer[(LCDWIDTH*p)+col]);
     }
     if (_cs > 0)
       digitalWrite(_cs, HIGH);

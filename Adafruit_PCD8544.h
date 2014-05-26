@@ -25,6 +25,8 @@ All text above, and the splash screen must be included in any redistribution
   #include "pins_arduino.h"
 #endif
 
+#include <SPI.h>
+
 #define BLACK 1
 #define WHITE 0
 
@@ -51,10 +53,19 @@ All text above, and the splash screen must be included in any redistribution
 #define PCD8544_SETBIAS 0x10
 #define PCD8544_SETVOP 0x80
 
+// Default to max SPI clock speed for PCD8544 of 4 mhz (16mhz / 4) for normal Arduinos.
+// This can be modified to change the clock speed if necessary (like for supporting other hardware).
+#define PCD8544_SPI_CLOCK_DIV SPI_CLOCK_DIV4
+
 class Adafruit_PCD8544 : public Adafruit_GFX {
  public:
+  // Software SPI with explicit CS pin.
   Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS, int8_t RST);
+  // Software SPI with CS tied to ground.  Saves a pin but other pins can't be shared with other hardware.
   Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST);
+  // Hardware SPI based on hardware controlled SCK (SCLK) and MOSI (DIN) pins. CS is still controlled by any IO pin.
+  // NOTE: MISO and SS will be set as an input and output respectively, so be careful sharing those pins!
+  Adafruit_PCD8544(int8_t DC, int8_t CS, int8_t RST);
 
   void begin(uint8_t contrast = 40, uint8_t bias = 0x04);
   
@@ -70,10 +81,12 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
 
  private:
   int8_t _din, _sclk, _dc, _rst, _cs;
-  volatile uint8_t *mosiport, *clkport, *csport, *dcport;
-  uint8_t mosipinmask, clkpinmask, cspinmask, dcpinmask;
+  uint8_t _spiClockDiv;
+  volatile uint8_t *mosiport, *clkport;
+  uint8_t mosipinmask, clkpinmask;
 
-  void fastSPIwrite(uint8_t c);
+  void spiWrite(uint8_t c);
+  bool isHardwareSPI();
 };
 
 #endif
