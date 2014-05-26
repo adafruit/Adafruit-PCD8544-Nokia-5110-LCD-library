@@ -150,6 +150,21 @@ void setup()   {
   display.display();
   delay(2000);
 
+  // rotation example
+  display.clearDisplay();
+  display.setRotation(1);  // rotate 90 degrees counter clockwise, can also use values of 2 and 3 to go further.
+  display.setTextSize(1);
+  display.setTextColor(BLACK);
+  display.setCursor(0,0);
+  display.println("Rotation");
+  display.setTextSize(2);
+  display.println("Example!");
+  display.display();
+  delay(2000);
+
+  // revert back to no rotation
+  display.setRotation(0);
+
   // miniature bitmap display
   display.clearDisplay();
   display.drawBitmap(30, 16,  logo16_glcd_bmp, 16, 16, 1);
