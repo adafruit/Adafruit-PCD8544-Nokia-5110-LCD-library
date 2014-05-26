@@ -150,7 +150,7 @@ uint8_t Adafruit_PCD8544::getPixel(int8_t x, int8_t y) {
 }
 
 
-void Adafruit_PCD8544::begin(uint8_t contrast) {
+void Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
   // set pin directions
   pinMode(_din, OUTPUT);
   pinMode(_sclk, OUTPUT);
@@ -180,7 +180,7 @@ void Adafruit_PCD8544::begin(uint8_t contrast) {
   command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION );
 
   // LCD bias select (4 is optimal?)
-  command(PCD8544_SETBIAS | 0x4);
+  command(PCD8544_SETBIAS | bias);
 
   // set VOP
   if (contrast > 0x7f)

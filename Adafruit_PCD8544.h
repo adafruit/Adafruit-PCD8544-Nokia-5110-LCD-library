@@ -56,7 +56,7 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
   Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS, int8_t RST);
   Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST);
 
-  void begin(uint8_t contrast = 40);
+  void begin(uint8_t contrast = 40, uint8_t bias = 0x04);
   
   void command(uint8_t c);
   void data(uint8_t c);
