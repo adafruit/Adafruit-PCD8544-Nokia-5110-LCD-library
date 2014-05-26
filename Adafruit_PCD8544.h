@@ -73,7 +73,6 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
   volatile uint8_t *mosiport, *clkport, *csport, *dcport;
   uint8_t mosipinmask, clkpinmask, cspinmask, dcpinmask;
 
-  void slowSPIwrite(uint8_t c);
   void fastSPIwrite(uint8_t c);
 };
 

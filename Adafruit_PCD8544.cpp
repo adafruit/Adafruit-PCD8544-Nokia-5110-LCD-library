@@ -218,10 +218,6 @@ inline void Adafruit_PCD8544::fastSPIwrite(uint8_t d) {
   }
 }
 
-inline void Adafruit_PCD8544::slowSPIwrite(uint8_t c) {
-  shiftOut(_din, _sclk, MSBFIRST, c);
-}
-
 void Adafruit_PCD8544::command(uint8_t c) {
   digitalWrite(_dc, LOW);
   if (_cs > 0)
