@@ -1,5 +1,5 @@
 {
-  "name": "Adafruit-Arduino-PCD8544",
+  "name": "Adafruit-PCD8544",
   "keywords": "display, lcd",
   "description": "Arduino driver for PC8544, most commonly found in small Monochrome Nokia 5110",
   "repository":
@@ -8,7 +8,10 @@
     "url": "https://github.com/adafruit/Adafruit-PCD8544-Nokia-5110-LCD-library.git"
   },
   "dependencies":
-  [
-    "Adafruit-Arduino-GFX"
-  ]  
+  {
+    "name": "Adafruit-GFX",
+    "frameworks": "arduino"
+  },
+  "frameworks": "arduino",
+  "platforms": "atmelavr"
 }
