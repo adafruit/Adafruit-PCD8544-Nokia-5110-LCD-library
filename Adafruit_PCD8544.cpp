@@ -23,7 +23,15 @@ All text above, and the splash screen below must be included in any redistributi
 #else
   #include "WProgram.h"
 #endif
-#include <util/delay.h>
+
+#ifdef __AVR__
+  #include <util/delay.h>
+#endif
+
+#ifndef _BV
+  #define _BV(x) (1 << (x))
+#endif
+
 #include <stdlib.h>
 
 #include <Adafruit_GFX.h>
@@ -192,7 +200,7 @@ void Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
   // toggle RST low to reset
   if (_rst > 0) {
     digitalWrite(_rst, LOW);
-    _delay_ms(500);
+    delay(500);
     digitalWrite(_rst, HIGH);
   }
 

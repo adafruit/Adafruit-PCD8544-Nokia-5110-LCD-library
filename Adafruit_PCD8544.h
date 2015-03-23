@@ -27,6 +27,15 @@ All text above, and the splash screen must be included in any redistribution
 
 #include <SPI.h>
 
+#ifdef __SAM3X8E__
+  typedef volatile RwReg PortReg;
+  typedef uint32_t PortMask;
+#else
+  typedef volatile uint8_t PortReg;
+  typedef uint8_t PortMask;
+#endif
+
+
 #define BLACK 1
 #define WHITE 0
 
@@ -81,8 +90,8 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
 
  private:
   int8_t _din, _sclk, _dc, _rst, _cs;
-  volatile uint8_t *mosiport, *clkport;
-  uint8_t mosipinmask, clkpinmask;
+  volatile PortReg  *mosiport, *clkport;
+  PortMask mosipinmask, clkpinmask;
 
   void spiWrite(uint8_t c);
   bool isHardwareSPI();
