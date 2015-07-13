@@ -30,6 +30,9 @@ All text above, and the splash screen must be included in any redistribution
 #ifdef __SAM3X8E__
   typedef volatile RwReg PortReg;
   typedef uint32_t PortMask;
+#elif defined (__STM32F1__)
+  typedef volatile uint32 PortReg;
+  typedef uint32_t PortMask;
 #else
   typedef volatile uint8_t PortReg;
   typedef uint8_t PortMask;
@@ -64,8 +67,12 @@ All text above, and the splash screen must be included in any redistribution
 
 // Default to max SPI clock speed for PCD8544 of 4 mhz (16mhz / 4) for normal Arduinos.
 // This can be modified to change the clock speed if necessary (like for supporting other hardware).
-#define PCD8544_SPI_CLOCK_DIV SPI_CLOCK_DIV4
-
+#if defined (__STM32F1__)
+  #define PCD8544_SPI_CLOCK_DIV SPI_CLOCK_DIV8
+#else
+  #define PCD8544_SPI_CLOCK_DIV SPI_CLOCK_DIV4
+#endif
+  
 class Adafruit_PCD8544 : public Adafruit_GFX {
  public:
   // Software SPI with explicit CS pin.
