@@ -26,7 +26,11 @@ All text above, and the splash screen must be included in any redistribution
 // pin 5 - Data/Command select (D/C)
 // pin 4 - LCD chip select (CS)
 // pin 3 - LCD reset (RST)
-Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
+#if defined (__STM32F1__)
+  Adafruit_PCD8544 display = Adafruit_PCD8544(PA0, PA1, PA2, PA3, PA4);
+#else
+  Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
+#endif
 
 // Hardware SPI (faster, but must use certain hardware pins):
 // SCK is LCD serial clock (SCLK) - this is pin 13 on Arduino Uno
@@ -34,7 +38,16 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
 // pin 5 - Data/Command select (D/C)
 // pin 4 - LCD chip select (CS)
 // pin 3 - LCD reset (RST)
+//
+// For the STM32F1:
+//   MOSI - on pin PA7
+//   SCK  - on PA5
+//
+//#if defined (__STM32F1__)
+//  Adafruit_PCD8544 display = Adafruit_PCD8544(PA2, PA3, PA4);
+//#else
 // Adafruit_PCD8544 display = Adafruit_PCD8544(5, 4, 3);
+//#endif
 // Note with hardware SPI MISO and SS pins aren't used but will still be read
 // and written to during SPI transfer.  Be careful sharing these pins!
 
