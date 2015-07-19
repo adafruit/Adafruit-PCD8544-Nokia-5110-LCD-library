@@ -40,8 +40,8 @@ All text above, and the splash screen must be included in any redistribution
 // pin 3 - LCD reset (RST)
 //
 // For the STM32F1:
-//   MOSI - on pin PA7
-//   SCK  - on PA5
+//   MOSI - on pin PA7 (Maple Mini: also know as pin 4)
+//   SCK  - on PA5 (Maple Mini: also know as pin 6)
 //
 //#if defined (__STM32F1__)
 //  Adafruit_PCD8544 display = Adafruit_PCD8544(PA2, PA3, PA4);
