@@ -17,7 +17,11 @@ All text above, and the splash screen below must be included in any redistributi
 *********************************************************************/
 
 //#include <Wire.h>
+#if defined(ESP8266)
+#include <pgmspace.h>
+#else
 #include <avr/pgmspace.h>
+#endif
 #if defined(ARDUINO) && ARDUINO >= 100
   #include "Arduino.h"
 #else
@@ -183,11 +187,13 @@ void Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
     pinMode(_din, OUTPUT);
     pinMode(_sclk, OUTPUT);
 
+#ifndef ESP8266
     // Set software SPI ports and masks.
     clkport     = portOutputRegister(digitalPinToPort(_sclk));
     clkpinmask  = digitalPinToBitMask(_sclk);
     mosiport    = portOutputRegister(digitalPinToPort(_din));
     mosipinmask = digitalPinToBitMask(_din);
+#endif
   }
 
   // Set common pin outputs.
@@ -242,6 +248,15 @@ inline void Adafruit_PCD8544::spiWrite(uint8_t d) {
     SPI.transfer(d);
   }
   else {
+#ifdef ESP8266
+    // Software SPI write with bit banging.
+    for(uint8_t bit = 0x80; bit; bit >>= 1) {
+      digitalWrite(_sclk, LOW);
+      if (d & bit) digitalWrite(_din, HIGH);
+      else         digitalWrite(_din, LOW);
+      digitalWrite(_sclk, HIGH);
+    }
+#else
     // Software SPI write with bit banging.
     for(uint8_t bit = 0x80; bit; bit >>= 1) {
       *clkport &= ~clkpinmask;
@@ -249,6 +264,7 @@ inline void Adafruit_PCD8544::spiWrite(uint8_t d) {
       else        *mosiport &= ~mosipinmask;
       *clkport |=  clkpinmask;
     }
+#endif
   }
 }
 
