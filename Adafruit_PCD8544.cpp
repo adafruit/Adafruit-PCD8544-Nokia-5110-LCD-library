@@ -176,7 +176,12 @@ void Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
   if (isHardwareSPI()) {
     // Setup hardware SPI.
     SPI.begin();
+#ifdef ESP8266
+    // Datasheet says 4 MHz is max SPI clock speed
+    SPI.setFrequency(4000000);
+#else
     SPI.setClockDivider(PCD8544_SPI_CLOCK_DIV);
+#endif
     SPI.setDataMode(SPI_MODE0);
     SPI.setBitOrder(MSBFIRST);
   }
