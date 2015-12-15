@@ -90,8 +90,10 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
 
  private:
   int8_t _din, _sclk, _dc, _rst, _cs;
+#ifndef __SAMD21G18A__
   volatile PortReg  *mosiport, *clkport;
   PortMask mosipinmask, clkpinmask;
+#endif
 
   void spiWrite(uint8_t c);
   bool isHardwareSPI();
