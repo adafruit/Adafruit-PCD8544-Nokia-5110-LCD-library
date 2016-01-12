@@ -101,7 +101,24 @@ uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
 static uint8_t xUpdateMin, xUpdateMax, yUpdateMin, yUpdateMax;
 #endif
 
+uint8_t * Adafruit_PCD8544::getPixelBuffer(){
+  return (uint8_t *) &pcd8544_buffer;
+}
 
+void Adafruit_PCD8544::powerSaving(boolean i) {
+  if(!i){
+	if (isHardwareSPI()) spi_begin();
+	command(PCD8544_FUNCTIONSET);
+	if (isHardwareSPI()) spi_end();
+	}
+  else {
+	clearDisplay();
+	display();
+	if (isHardwareSPI()) spi_begin();
+	command(PCD8544_FUNCTIONSET | PCD8544_POWERDOWN);
+	if (isHardwareSPI()) spi_end();
+	}
+}
 
 static void updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax, uint8_t ymax) {
 #ifdef enablePartialUpdate

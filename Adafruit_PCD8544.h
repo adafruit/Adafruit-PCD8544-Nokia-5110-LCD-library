@@ -85,6 +85,10 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
   void clearDisplay(void);
   void display();
   void invertDisplay(boolean i);
+  // Return the address of the raw buffer for application-side processing
+  uint8_t * getPixelBuffer();
+  // Enable/disable power-saving mode, ie. turn the display off/on
+  void powerSaving(boolean i);
   
   void drawPixel(int16_t x, int16_t y, uint16_t color);
   uint8_t getPixel(int8_t x, int8_t y);
