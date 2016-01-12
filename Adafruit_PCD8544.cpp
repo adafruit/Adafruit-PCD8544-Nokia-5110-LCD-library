@@ -37,6 +37,24 @@ All text above, and the splash screen below must be included in any redistributi
 #include <Adafruit_GFX.h>
 #include "Adafruit_PCD8544.h"
 
+// If the SPI library has transaction support, these functions
+// establish settings and protect from interference from other
+// libraries.  Otherwise, they simply do nothing.
+#ifdef SPI_HAS_TRANSACTION
+SPISettings spiSettings = SPISettings(PCD8544_SPI_CLOCK_DIV, MSBFIRST, SPI_MODE0);
+static inline void spi_begin(void) __attribute__((always_inline));
+static inline void spi_begin(void) {
+  SPI.beginTransaction(spiSettings);
+}
+static inline void spi_end(void) __attribute__((always_inline));
+static inline void spi_end(void) {
+  SPI.endTransaction();
+}
+#else
+#define spi_begin()
+#define spi_end()
+#endif
+
 // the memory buffer for the LCD
 uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -204,6 +222,8 @@ void Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
     digitalWrite(_rst, HIGH);
   }
 
+  if (isHardwareSPI()) spi_begin();
+
   // get into the EXTENDED mode!
   command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION );
 
@@ -222,6 +242,8 @@ void Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
 
   // Set display to Normal
   command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL);
+
+  if (isHardwareSPI()) spi_end();
 
   // initial display line
   // set page address
@@ -278,10 +300,11 @@ void Adafruit_PCD8544::setContrast(uint8_t val) {
   if (val > 0x7f) {
     val = 0x7f;
   }
+  if (isHardwareSPI()) spi_begin();
   command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION );
   command( PCD8544_SETVOP | val); 
   command(PCD8544_FUNCTIONSET);
-  
+  if (isHardwareSPI()) spi_end();  
  }
 
 
@@ -289,6 +312,7 @@ void Adafruit_PCD8544::setContrast(uint8_t val) {
 void Adafruit_PCD8544::display(void) {
   uint8_t col, maxcol, p;
   
+  if (isHardwareSPI()) spi_begin();
   for(p = 0; p < 6; p++) {
 #ifdef enablePartialUpdate
     // check if this page is part of update
@@ -326,6 +350,7 @@ void Adafruit_PCD8544::display(void) {
   }
 
   command(PCD8544_SETYADDR );  // no idea why this is necessary but it is to finish the last byte?
+  if (isHardwareSPI()) spi_end();
 #ifdef enablePartialUpdate
   xUpdateMin = LCDWIDTH - 1;
   xUpdateMax = 0;
@@ -340,6 +365,13 @@ void Adafruit_PCD8544::clearDisplay(void) {
   memset(pcd8544_buffer, 0, LCDWIDTH*LCDHEIGHT/8);
   updateBoundingBox(0, 0, LCDWIDTH-1, LCDHEIGHT-1);
   cursor_y = cursor_x = 0;
+}
+
+void Adafruit_PCD8544::invertDisplay(boolean i) {
+  if (isHardwareSPI()) spi_begin();
+  command(PCD8544_FUNCTIONSET);
+  command(PCD8544_DISPLAYCONTROL | (i ? PCD8544_DISPLAYINVERTED : PCD8544_DISPLAYNORMAL));
+  if (isHardwareSPI()) spi_end();
 }
 
 /*
