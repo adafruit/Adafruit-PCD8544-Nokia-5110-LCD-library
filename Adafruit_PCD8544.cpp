@@ -4,14 +4,14 @@ This is a library for our Monochrome Nokia 5110 LCD Displays
   Pick one up today in the adafruit shop!
   ------> http://www.adafruit.com/products/338
 
-These displays use SPI to communicate, 4 or 5 pins are required to  
+These displays use SPI to communicate, 4 or 5 pins are required to
 interface
 
-Adafruit invests time and resources providing this open source code, 
-please support Adafruit and open-source hardware by purchasing 
+Adafruit invests time and resources providing this open source code,
+please support Adafruit and open-source hardware by purchasing
 products from Adafruit!
 
-Written by Limor Fried/Ladyada  for Adafruit Industries.  
+Written by Limor Fried/Ladyada  for Adafruit Industries.
 BSD license, check license.txt for more information
 All text above, and the splash screen below must be included in any redistribution
 *********************************************************************/
@@ -88,7 +88,7 @@ uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x0F, 0x1F, 0x3F, 0x7F, 0x7F,
 0xFF, 0xFF, 0xFF, 0xFF, 0x7F, 0x7F, 0x1F, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
 
@@ -100,6 +100,81 @@ uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
 #ifdef enablePartialUpdate
 static uint8_t xUpdateMin, xUpdateMax, yUpdateMin, yUpdateMax;
 #endif
+
+void Adafruit_PCD8544::scroll(uint8_t direction, uint8_t pixels){
+  uint8_t oldpixels;
+  uint8_t newpixels;
+  int i, j;
+  if (pixels==0) {
+    return;
+  }
+  switch(direction){
+    case SCROLL_DOWN:
+      if (pixels>7) {
+          if (pixels>=LCDHEIGHT) {
+            memset(pcd8544_buffer, 0, LCDWIDTH*LCDHEIGHT/8);
+            return;
+          }
+        memmove(&pcd8544_buffer[LCDWIDTH*((pixels)>>3)],&pcd8544_buffer[0],LCDWIDTH*((LCDHEIGHT-pixels)>>3));
+        memset(pcd8544_buffer, 0, LCDWIDTH*((pixels)>>3));
+      }
+      if (pixels % 8 != 0) {
+        for (i=0;i<LCDWIDTH;i++) {
+          newpixels = 0;
+          for (j=0;j<LCDHEIGHT/8;j++) {
+            oldpixels = pcd8544_buffer[i+j*LCDWIDTH]>>(8-(pixels % 8));
+            pcd8544_buffer[i+j*LCDWIDTH] = (pcd8544_buffer[i+j*LCDWIDTH] << (pixels % 8))|newpixels;
+            newpixels=oldpixels;
+          }
+        }
+      }
+      break;
+    case SCROLL_UP:
+      if (pixels>7) {
+          if (pixels>=LCDHEIGHT) {
+            memset(pcd8544_buffer, 0, LCDWIDTH*LCDHEIGHT/8);
+            return;
+          }
+        memmove(&pcd8544_buffer[LCDWIDTH*((pixels)>>3)],&pcd8544_buffer[0],LCDWIDTH*((LCDHEIGHT-pixels)>>3));
+        memset(pcd8544_buffer, 0, LCDWIDTH*((pixels)>>3));
+      }
+      if (pixels % 8 != 0) {
+        for (i=0;i<LCDWIDTH;i++) {
+          newpixels = 0;
+          for (j=0;j<LCDHEIGHT/8;j++) {
+            oldpixels = pcd8544_buffer[i+(LCDHEIGHT/8-1-j)*LCDWIDTH] << (8-(pixels % 8));
+            pcd8544_buffer[i+(LCDHEIGHT/8-1-j)*LCDWIDTH] = (pcd8544_buffer[i+(LCDHEIGHT/8-1-j)*LCDWIDTH] >> (pixels % 8))|newpixels;
+            newpixels=oldpixels;
+          }
+        }
+      }
+      break;
+    case SCROLL_LEFT:
+      if (pixels>=LCDWIDTH) {
+      memset(pcd8544_buffer, 0, LCDWIDTH*LCDHEIGHT/8);
+      return;
+      }
+      for (i=0;i<LCDHEIGHT/8;i++) {
+        memmove(&pcd8544_buffer[i*LCDWIDTH],&pcd8544_buffer[i*LCDWIDTH+pixels],LCDWIDTH-pixels);
+        memset(&pcd8544_buffer[i*LCDWIDTH-pixels], 0, pixels);
+      }
+      for(i=0; i<pixels; i++) Adafruit_GFX::drawFastVLine(LCDWIDTH - i - 1, 0, LCDHEIGHT, 0);
+      break;
+    case SCROLL_RIGHT:
+      if (pixels>=LCDWIDTH) {
+        memset(pcd8544_buffer, 0, LCDWIDTH*LCDHEIGHT/8);
+        return;
+        }
+      for (i=0;i<LCDHEIGHT/8;i++) {
+        memmove(&pcd8544_buffer[i*LCDWIDTH+pixels],&pcd8544_buffer[i*LCDWIDTH],LCDWIDTH-pixels);
+        memset(&pcd8544_buffer[(i+1)*LCDWIDTH-pixels], 0, pixels);
+      }
+      for(i=0; i<pixels; i++) Adafruit_GFX::drawFastVLine(i, 0, LCDHEIGHT, 0);
+      break;
+    default:
+      break;
+  }
+}
 
 uint8_t * Adafruit_PCD8544::getPixelBuffer(){
   return (uint8_t *) &pcd8544_buffer;
@@ -185,10 +260,10 @@ void Adafruit_PCD8544::drawPixel(int16_t x, int16_t y, uint16_t color) {
     return;
 
   // x is which column
-  if (color) 
-    pcd8544_buffer[x+ (y/8)*LCDWIDTH] |= _BV(y%8);  
+  if (color)
+    pcd8544_buffer[x+ (y/8)*LCDWIDTH] |= _BV(y%8);
   else
-    pcd8544_buffer[x+ (y/8)*LCDWIDTH] &= ~_BV(y%8); 
+    pcd8544_buffer[x+ (y/8)*LCDWIDTH] &= ~_BV(y%8);
 
   updateBoundingBox(x,y,x,y);
 }
@@ -199,7 +274,7 @@ uint8_t Adafruit_PCD8544::getPixel(int8_t x, int8_t y) {
   if ((x < 0) || (x >= LCDWIDTH) || (y < 0) || (y >= LCDHEIGHT))
     return 0;
 
-  return (pcd8544_buffer[x+ (y/8)*LCDWIDTH] >> (y%8)) & 0x1;  
+  return (pcd8544_buffer[x+ (y/8)*LCDWIDTH] >> (y%8)) & 0x1;
 }
 
 
@@ -319,16 +394,16 @@ void Adafruit_PCD8544::setContrast(uint8_t val) {
   }
   if (isHardwareSPI()) spi_begin();
   command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION );
-  command( PCD8544_SETVOP | val); 
+  command( PCD8544_SETVOP | val);
   command(PCD8544_FUNCTIONSET);
-  if (isHardwareSPI()) spi_end();  
+  if (isHardwareSPI()) spi_end();
  }
 
 
 
 void Adafruit_PCD8544::display(void) {
   uint8_t col, maxcol, p;
-  
+
   if (isHardwareSPI()) spi_begin();
   for(p = 0; p < 6; p++) {
 #ifdef enablePartialUpdate
@@ -394,9 +469,9 @@ void Adafruit_PCD8544::invertDisplay(boolean i) {
 /*
 // this doesnt touch the buffer, just clears the display RAM - might be handy
 void Adafruit_PCD8544::clearDisplay(void) {
-  
+
   uint8_t p, c;
-  
+
   for(p = 0; p < 8; p++) {
 
     st7565_command(CMD_SET_PAGE | p);
@@ -406,7 +481,7 @@ void Adafruit_PCD8544::clearDisplay(void) {
       st7565_command(CMD_SET_COLUMN_LOWER | (c & 0xf));
       st7565_command(CMD_SET_COLUMN_UPPER | ((c >> 4) & 0xf));
       st7565_data(0x0);
-    }     
+    }
     }
 
 }
