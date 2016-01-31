@@ -30,6 +30,9 @@ All text above, and the splash screen must be included in any redistribution
 #ifdef __SAM3X8E__
   typedef volatile RwReg PortReg;
   typedef uint32_t PortMask;
+#elif defined(ESP8266)
+  typedef volatile uint32_t PortReg;
+  typedef uint32_t PortMask;  
 #else
   typedef volatile uint8_t PortReg;
   typedef uint8_t PortMask;
