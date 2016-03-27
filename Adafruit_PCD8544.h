@@ -86,6 +86,7 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
   void data(uint8_t c);
   
   void setContrast(uint8_t val);
+  void setBias(uint8_t val);
   void clearDisplay(void);
   void display();
   

@@ -292,7 +292,14 @@ void Adafruit_PCD8544::setContrast(uint8_t val) {
   
  }
 
-
+void Adafruit_PCD8544::setBias(uint8_t val) {
+  if (val > 0x07) {
+    val = 0x07;
+  }
+  command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION );
+  command(PCD8544_SETBIAS | val);
+  command(PCD8544_FUNCTIONSET);
+}
 
 void Adafruit_PCD8544::display(void) {
   uint8_t col, maxcol, p;
