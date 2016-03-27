@@ -92,7 +92,6 @@ static uint8_t xUpdateMin, xUpdateMax, yUpdateMin, yUpdateMax;
 #endif
 
 
-
 static void updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax, uint8_t ymax) {
 #ifdef enablePartialUpdate
   if (xmin < xUpdateMin) xUpdateMin = xmin;
@@ -212,18 +211,8 @@ void Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
     digitalWrite(_rst, HIGH);
   }
 
-  // get into the EXTENDED mode!
-  command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION );
-
-  // LCD bias select (4 is optimal?)
-  command(PCD8544_SETBIAS | bias);
-
-  // set VOP
-  if (contrast > 0x7f)
-    contrast = 0x7f;
-
-  command( PCD8544_SETVOP | contrast); // Experimentally determined
-
+  setBias(bias);
+  setContrast(contrast);
 
   // normal mode
   command(PCD8544_FUNCTIONSET);
@@ -286,6 +275,7 @@ void Adafruit_PCD8544::setContrast(uint8_t val) {
   if (val > 0x7f) {
     val = 0x7f;
   }
+  _contrast = val;
   command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION );
   command( PCD8544_SETVOP | val); 
   command(PCD8544_FUNCTIONSET);
@@ -296,9 +286,20 @@ void Adafruit_PCD8544::setBias(uint8_t val) {
   if (val > 0x07) {
     val = 0x07;
   }
+  _bias = val;
   command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION );
   command(PCD8544_SETBIAS | val);
   command(PCD8544_FUNCTIONSET);
+}
+
+uint8_t Adafruit_PCD8544::getBias()
+{
+  return _bias;
+}
+
+uint8_t Adafruit_PCD8544::getContrast()
+{
+  return _contrast;
 }
 
 void Adafruit_PCD8544::display(void) {

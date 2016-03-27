@@ -87,6 +87,8 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
   
   void setContrast(uint8_t val);
   void setBias(uint8_t val);
+  uint8_t getContrast(void);
+  uint8_t getBias(void);
   void clearDisplay(void);
   void display();
   
@@ -95,6 +97,7 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
 
  private:
   int8_t _din, _sclk, _dc, _rst, _cs;
+  uint8_t _contrast, _bias;
   volatile PortReg  *mosiport, *clkport;
   PortMask mosipinmask, clkpinmask;
 
