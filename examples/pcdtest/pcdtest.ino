@@ -90,7 +90,24 @@ void testdrawbitmap(const uint8_t *bitmap, uint8_t w, uint8_t h) {
     }
     display.display();
     delay(200);
-    
+
+    while(Serial.available()) {
+        switch (Serial.read()) {
+          case 'w':display.setContrast(display.getContrast() + 1);
+                   break;
+          case 's':if(display.getContrast()) display.setContrast(display.getContrast() - 1);
+                     break;
+          case 'e':display.setBias(display.getBias() + 1);
+                   break;
+          case 'd':if(display.getBias()) display.setBias(display.getBias() - 1);
+        }
+    }
+    Serial.print("contrast (w/s): 0x");
+    Serial.print(display.getContrast(), HEX);
+    Serial.print("   bias (e/d): 0x");
+    Serial.print(display.getBias(), HEX);
+    Serial.print("   \r");
+
     // then erase it + move it
     for (uint8_t f=0; f< NUMFLAKES; f++) {
       display.drawBitmap(icons[f][XPOS], icons[f][YPOS],  logo16_glcd_bmp, w, h, WHITE);
