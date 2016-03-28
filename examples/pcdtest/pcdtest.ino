@@ -100,12 +100,20 @@ void testdrawbitmap(const uint8_t *bitmap, uint8_t w, uint8_t h) {
           case 'e':display.setBias(display.getBias() + 1);
                    break;
           case 'd':if(display.getBias()) display.setBias(display.getBias() - 1);
+                   break;
+          case 'R':display.setReinitInterval(10);
+                   break;
+          case 'r':display.initDisplay();
+                   display.setReinitInterval(0);
+                   break;
         }
     }
     Serial.print("contrast (w/s): 0x");
     Serial.print(display.getContrast(), HEX);
     Serial.print("   bias (e/d): 0x");
     Serial.print(display.getBias(), HEX);
+    Serial.print("   reinitialize display (r/R): 0x");
+    Serial.print(display.getReinitInterval(), HEX);
     Serial.print("   \r");
 
     // then erase it + move it
@@ -254,7 +262,6 @@ void setup()   {
   // you can change the contrast around to adapt the display
   // for the best viewing!
   display.setContrast(50);
-  display.setReinitInterval(10);
 
   display.display(); // show splashscreen
   delay(2000);
