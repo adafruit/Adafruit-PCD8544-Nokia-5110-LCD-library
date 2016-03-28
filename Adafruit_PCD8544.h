@@ -91,6 +91,8 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
   uint8_t getBias(void);
   void clearDisplay(void);
   void display();
+  void setReinitInterval(uint8_t val);
+  uint8_t getReinitInterval(void);
   
   void drawPixel(int16_t x, int16_t y, uint16_t color);
   uint8_t getPixel(int8_t x, int8_t y);
@@ -98,9 +100,11 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
  private:
   int8_t _din, _sclk, _dc, _rst, _cs;
   uint8_t _contrast, _bias;
+  uint8_t _reinit_interval, _display_count;
   volatile PortReg  *mosiport, *clkport;
   PortMask mosipinmask, clkpinmask;
 
+  void initDisplay();
   void spiWrite(uint8_t c);
   bool isHardwareSPI();
 };

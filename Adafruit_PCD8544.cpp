@@ -174,6 +174,25 @@ uint8_t Adafruit_PCD8544::getPixel(int8_t x, int8_t y) {
   return (pcd8544_buffer[x+ (y/8)*LCDWIDTH] >> (y%8)) & 0x1;  
 }
 
+void Adafruit_PCD8544::initDisplay()
+{
+
+  // toggle RST low to reset
+  if (_rst > 0) {
+    digitalWrite(_rst, LOW);
+    delay(500);
+    digitalWrite(_rst, HIGH);
+  }
+
+  setBias(_bias);
+  setContrast(_contrast);
+
+  // normal mode
+  command(PCD8544_FUNCTIONSET);
+
+  // Set display to Normal
+  command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL);
+}
 
 void Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
   if (isHardwareSPI()) {
@@ -204,21 +223,11 @@ void Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
   if (_cs > 0)
       pinMode(_cs, OUTPUT);
 
-  // toggle RST low to reset
-  if (_rst > 0) {
-    digitalWrite(_rst, LOW);
-    delay(500);
-    digitalWrite(_rst, HIGH);
-  }
-
-  setBias(bias);
-  setContrast(contrast);
-
-  // normal mode
-  command(PCD8544_FUNCTIONSET);
-
-  // Set display to Normal
-  command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL);
+  _bias = bias;
+  _contrast = contrast;
+  _reinit_interval = 0;
+  _display_count = 0;
+  initDisplay();
 
   // initial display line
   // set page address
@@ -302,9 +311,32 @@ uint8_t Adafruit_PCD8544::getContrast()
   return _contrast;
 }
 
+void Adafruit_PCD8544::setReinitInterval(uint8_t val) {
+    _reinit_interval = val;
+}
+uint8_t Adafruit_PCD8544::getReinitInterval()
+{
+  return _reinit_interval;
+}
+
 void Adafruit_PCD8544::display(void) {
   uint8_t col, maxcol, p;
-  
+
+  if(_reinit_interval) {
+      _display_count++;
+      if(_display_count >= _reinit_interval)
+	{
+	  _display_count = 0;
+	  initDisplay();
+#ifdef enablePartialUpdate
+	  yUpdateMin = 0;
+	  yUpdateMax = LCDHEIGHT-1;
+	  xUpdateMin = 0;
+	  xUpdateMax = LCDWIDTH-1;
+#endif
+	}
+  }
+
   for(p = 0; p < 6; p++) {
 #ifdef enablePartialUpdate
     // check if this page is part of update
