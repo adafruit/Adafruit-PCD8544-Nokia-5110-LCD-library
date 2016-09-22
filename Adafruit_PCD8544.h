@@ -27,7 +27,7 @@ All text above, and the splash screen must be included in any redistribution
 
 #include <SPI.h>
 
-#ifdef __SAM3X8E__
+#if  defined(__SAM3X8E__) || defined(ARDUINO_ARCH_SAMD)
   typedef volatile RwReg PortReg;
   typedef uint32_t PortMask;
 #else

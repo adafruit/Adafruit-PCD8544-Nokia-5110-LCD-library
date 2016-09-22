@@ -37,6 +37,11 @@ All text above, and the splash screen below must be included in any redistributi
 #include <Adafruit_GFX.h>
 #include "Adafruit_PCD8544.h"
 
+#ifndef _BV
+  #define _BV(bit) (1<<(bit))
+#endif
+
+
 // the memory buffer for the LCD
 uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
