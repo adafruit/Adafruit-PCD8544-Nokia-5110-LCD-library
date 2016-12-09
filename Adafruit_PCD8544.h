@@ -86,6 +86,8 @@ class Adafruit_PCD8544 : public Adafruit_GFX {
   void display();
   
   void drawPixel(int16_t x, int16_t y, uint16_t color);
+  void drawXbm(int16_t x_off, int16_t y_off, unsigned char *xbm, int16_t w, int16_t h, bool inverted = false);
+
   uint8_t getPixel(int8_t x, int8_t y);
 
  private:
