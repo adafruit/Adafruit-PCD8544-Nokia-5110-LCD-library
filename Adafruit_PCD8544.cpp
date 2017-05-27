@@ -88,7 +88,7 @@ uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
 static uint8_t xUpdateMin, xUpdateMax, yUpdateMin, yUpdateMax;
 #endif
 
-
+static uint8_t backlightPin = 0;
 
 static void updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax, uint8_t ymax) {
 #ifdef enablePartialUpdate
@@ -240,6 +240,15 @@ void Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
   display();
 }
 
+void Adafruit_PCD8544::setBacklightPin(uint8_t pin) {
+  backlightPin = pin;
+  pinMode(backlightPin, OUTPUT);
+  digitalWrite(backlightPin, LOW);
+}
+
+void Adafruit_PCD8544::setBacklight(uint8_t val) {
+  analogWrite(backlightPin, map(val, 0, 255, 255, 0));
+}
 
 inline void Adafruit_PCD8544::spiWrite(uint8_t d) {
   if (isHardwareSPI()) {
