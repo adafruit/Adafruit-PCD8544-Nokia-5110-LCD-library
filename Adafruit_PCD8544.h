@@ -30,9 +30,12 @@ All text above, and the splash screen must be included in any redistribution
 #if  defined(__SAM3X8E__) || defined(ARDUINO_ARCH_SAMD)
   typedef volatile RwReg PortReg;
   typedef uint32_t PortMask;
-#else
+#elif defined(__AVR__)
   typedef volatile uint8_t PortReg;
   typedef uint8_t PortMask;
+#else
+  typedef volatile uint32_t PortReg;
+  typedef uint32_t PortMask;
 #endif
 
 
