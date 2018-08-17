@@ -26,7 +26,7 @@ All text above, and the splash screen must be included in any redistribution
 // pin 5 - Data/Command select (D/C)
 // pin 4 - LCD chip select (CS)
 // pin 3 - LCD reset (RST)
- #if defined (__STM32F1__)
+ #if defined (__STM32F1__) || defined (ARDUINO_ARCH_STM32)
    Adafruit_PCD8544 display = Adafruit_PCD8544(PB12, PA8, PB15, PB14, PB13);
  #else
    Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
@@ -42,7 +42,7 @@ All text above, and the splash screen must be included in any redistribution
 //   MOSI - on PA7 (Maple Mini: also known as pin 4)
 //   SCK  - on PA5 (Maple Mini: also known as pin 6)
 //
-//#if defined (__STM32F1__)
+//#if defined (__STM32F1__) || defined (ARDUINO_ARCH_STM32)
   //Adafruit_PCD8544 display = Adafruit_PCD8544(PB15, PB14, PB13);
 //#else
   //Adafruit_PCD8544 display = Adafruit_PCD8544(5, 4, 3);
