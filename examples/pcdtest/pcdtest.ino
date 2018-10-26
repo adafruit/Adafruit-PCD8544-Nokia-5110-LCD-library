@@ -19,6 +19,7 @@ All text above, and the splash screen must be included in any redistribution
 #include <SPI.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
+#include<LiquidCrystal.h>
 
 // Software SPI (slower updates, more flexible pin options):
 // pin 7 - Serial clock out (SCLK)
