@@ -26,6 +26,7 @@ All text above, and the splash screen must be included in any redistribution
 #endif
 
 #include <SPI.h>
+#include <Adafruit_GFX.h>
 
 #if  defined(__SAM3X8E__) || defined(ARDUINO_ARCH_SAMD)
   typedef volatile RwReg PortReg;
