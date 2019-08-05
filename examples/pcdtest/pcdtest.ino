@@ -65,127 +65,6 @@ static const unsigned char PROGMEM logo16_glcd_bmp[] =
   B01110000, B01110000,
   B00000000, B00110000 };
 
-void setup()   {
-  Serial.begin(9600);
-
-  display.begin();
-  // init done
-
-  // you can change the contrast around to adapt the display
-  // for the best viewing!
-  display.setContrast(50);
-
-  display.display(); // show splashscreen
-  delay(2000);
-  display.clearDisplay();   // clears the screen and buffer
-
-  // draw a single pixel
-  display.drawPixel(10, 10, BLACK);
-  display.display();
-  delay(2000);
-  display.clearDisplay();
-
-  // draw many lines
-  testdrawline();
-  display.display();
-  delay(2000);
-  display.clearDisplay();
-
-  // draw rectangles
-  testdrawrect();
-  display.display();
-  delay(2000);
-  display.clearDisplay();
-
-  // draw multiple rectangles
-  testfillrect();
-  display.display();
-  delay(2000);
-  display.clearDisplay();
-
-  // draw mulitple circles
-  testdrawcircle();
-  display.display();
-  delay(2000);
-  display.clearDisplay();
-
-  // draw a circle, 10 pixel radius
-  display.fillCircle(display.width()/2, display.height()/2, 10, BLACK);
-  display.display();
-  delay(2000);
-  display.clearDisplay();
-
-  testdrawroundrect();
-  delay(2000);
-  display.clearDisplay();
-
-  testfillroundrect();
-  delay(2000);
-  display.clearDisplay();
-
-  testdrawtriangle();
-  delay(2000);
-  display.clearDisplay();
-   
-  testfilltriangle();
-  delay(2000);
-  display.clearDisplay();
-
-  // draw the first ~12 characters in the font
-  testdrawchar();
-  display.display();
-  delay(2000);
-  display.clearDisplay();
-
-  // text display tests
-  display.setTextSize(1);
-  display.setTextColor(BLACK);
-  display.setCursor(0,0);
-  display.println("Hello, world!");
-  display.setTextColor(WHITE, BLACK); // 'inverted' text
-  display.println(3.141592);
-  display.setTextSize(2);
-  display.setTextColor(BLACK);
-  display.print("0x"); display.println(0xDEADBEEF, HEX);
-  display.display();
-  delay(2000);
-
-  // rotation example
-  display.clearDisplay();
-  display.setRotation(1);  // rotate 90 degrees counter clockwise, can also use values of 2 and 3 to go further.
-  display.setTextSize(1);
-  display.setTextColor(BLACK);
-  display.setCursor(0,0);
-  display.println("Rotation");
-  display.setTextSize(2);
-  display.println("Example!");
-  display.display();
-  delay(2000);
-
-  // revert back to no rotation
-  display.setRotation(0);
-
-  // miniature bitmap display
-  display.clearDisplay();
-  display.drawBitmap(30, 16,  logo16_glcd_bmp, 16, 16, 1);
-  display.display();
-
-  // invert the display
-  display.invertDisplay(true);
-  delay(1000); 
-  display.invertDisplay(false);
-  delay(1000); 
-
-  // draw a bitmap icon and 'animate' movement
-  testdrawbitmap(logo16_glcd_bmp, LOGO16_GLCD_WIDTH, LOGO16_GLCD_HEIGHT);
-}
-
-
-void loop() {
-  
-}
-
-
 void testdrawbitmap(const uint8_t *bitmap, uint8_t w, uint8_t h) {
   uint8_t icons[NUMFLAKES][3];
   randomSeed(666);     // whatever seed
@@ -211,7 +90,24 @@ void testdrawbitmap(const uint8_t *bitmap, uint8_t w, uint8_t h) {
     }
     display.display();
     delay(200);
-    
+
+    while(Serial.available()) {
+        switch (Serial.read()) {
+          case 'w':display.setContrast(display.getContrast() + 1);
+                   break;
+          case 's':if(display.getContrast()) display.setContrast(display.getContrast() - 1);
+                     break;
+          case 'e':display.setBias(display.getBias() + 1);
+                   break;
+          case 'd':if(display.getBias()) display.setBias(display.getBias() - 1);
+        }
+    }
+    Serial.print("contrast (w/s): 0x");
+    Serial.print(display.getContrast(), HEX);
+    Serial.print("   bias (e/d): 0x");
+    Serial.print(display.getBias(), HEX);
+    Serial.print("   \r");
+
     // then erase it + move it
     for (uint8_t f=0; f< NUMFLAKES; f++) {
       display.drawBitmap(icons[f][XPOS], icons[f][YPOS],  logo16_glcd_bmp, w, h, WHITE);
@@ -347,4 +243,125 @@ void testdrawline() {
     display.display();
   }
   delay(250);
+}
+
+void setup()   {
+  Serial.begin(9600);
+
+  display.begin();
+  // init done
+
+  // you can change the contrast around to adapt the display
+  // for the best viewing!
+  display.setContrast(50);
+  display.setReinitInterval(10);
+
+  display.display(); // show splashscreen
+  delay(2000);
+  display.clearDisplay();   // clears the screen and buffer
+
+  // draw a single pixel
+  display.drawPixel(10, 10, BLACK);
+  display.display();
+  delay(2000);
+  display.clearDisplay();
+
+  // draw many lines
+  testdrawline();
+  display.display();
+  delay(2000);
+  display.clearDisplay();
+
+  // draw rectangles
+  testdrawrect();
+  display.display();
+  delay(2000);
+  display.clearDisplay();
+
+  // draw multiple rectangles
+  testfillrect();
+  display.display();
+  delay(2000);
+  display.clearDisplay();
+
+  // draw mulitple circles
+  testdrawcircle();
+  display.display();
+  delay(2000);
+  display.clearDisplay();
+
+  // draw a circle, 10 pixel radius
+  display.fillCircle(display.width()/2, display.height()/2, 10, BLACK);
+  display.display();
+  delay(2000);
+  display.clearDisplay();
+
+  testdrawroundrect();
+  delay(2000);
+  display.clearDisplay();
+
+  testfillroundrect();
+  delay(2000);
+  display.clearDisplay();
+
+  testdrawtriangle();
+  delay(2000);
+  display.clearDisplay();
+   
+  testfilltriangle();
+  delay(2000);
+  display.clearDisplay();
+
+  // draw the first ~12 characters in the font
+  testdrawchar();
+  display.display();
+  delay(2000);
+  display.clearDisplay();
+
+  // text display tests
+  display.setTextSize(1);
+  display.setTextColor(BLACK);
+  display.setCursor(0,0);
+  display.println("Hello, world!");
+  display.setTextColor(WHITE, BLACK); // 'inverted' text
+  display.println(3.141592);
+  display.setTextSize(2);
+  display.setTextColor(BLACK);
+  display.print("0x"); display.println(0xDEADBEEF, HEX);
+  display.display();
+  delay(2000);
+
+  // rotation example
+  display.clearDisplay();
+  display.setRotation(1);  // rotate 90 degrees counter clockwise, can also use values of 2 and 3 to go further.
+  display.setTextSize(1);
+  display.setTextColor(BLACK);
+  display.setCursor(0,0);
+  display.println("Rotation");
+  display.setTextSize(2);
+  display.println("Example!");
+  display.display();
+  delay(2000);
+
+  // revert back to no rotation
+  display.setRotation(0);
+
+  // miniature bitmap display
+  display.clearDisplay();
+  display.drawBitmap(30, 16,  logo16_glcd_bmp, 16, 16, 1);
+  display.display();
+
+  // invert the display
+  display.invertDisplay(true);
+  delay(1000); 
+  display.invertDisplay(false);
+  delay(1000); 
+
+  // draw a bitmap icon and 'animate' movement
+  testdrawbitmap(logo16_glcd_bmp, LOGO16_GLCD_WIDTH, LOGO16_GLCD_HEIGHT);
+}
+
+
+void loop() {
+  
 }
