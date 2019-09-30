@@ -1,22 +1,35 @@
-/*********************************************************************
-This is a library for our Monochrome Nokia 5110 LCD Displays
+/**************************************************************************/
+/*!
+  @file Adafruit_PCD8544.cpp
+
+  @mainpage Adafruit PCD8544 Nokia 5110 LCD Library
+
+  @section intro Introduction
+
+  This is a library for our Monochrome Nokia 5110 LCD Displays
 
   Pick one up today in the adafruit shop!
   ------> http://www.adafruit.com/products/338
 
-These displays use SPI to communicate, 4 or 5 pins are required to  
-interface
+  These displays use SPI to communicate, 4 or 5 pins are required to
+  interface
 
-Adafruit invests time and resources providing this open source code, 
-please support Adafruit and open-source hardware by purchasing 
-products from Adafruit!
+  Adafruit invests time and resources providing this open source code,
+  please support Adafruit and open-source hardware by purchasing
+  products from Adafruit!
 
-Written by Limor Fried/Ladyada  for Adafruit Industries.  
-BSD license, check license.txt for more information
-All text above, and the splash screen below must be included in any redistribution
-*********************************************************************/
+  @section author Author
 
-//#include <Wire.h>
+  Written by Limor Fried/Ladyada  for Adafruit Industries.
+
+  @section license License
+
+  BSD license, check license.txt for more information
+  All text above, and the splash screen below must be included in any redistribution
+
+ */
+/**************************************************************************/
+
 #ifdef __AVR__
 #include <avr/pgmspace.h>
 #endif
@@ -32,7 +45,7 @@ All text above, and the splash screen below must be included in any redistributi
 #endif
 
 #ifndef _BV
-  #define _BV(x) (1 << (x))
+  #define _BV(x) (1 << (x))   ///< Mask for bit position x
 #endif
 
 #include <stdlib.h>
@@ -45,7 +58,7 @@ All text above, and the splash screen below must be included in any redistributi
 #endif
 
 
-// the memory buffer for the LCD
+/** the memory buffer for the LCD */
 uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -78,7 +91,7 @@ uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x0F, 0x1F, 0x3F, 0x7F, 0x7F,
 0xFF, 0xFF, 0xFF, 0xFF, 0x7F, 0x7F, 0x1F, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
 
@@ -91,7 +104,13 @@ uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
 static uint8_t xUpdateMin, xUpdateMax, yUpdateMin, yUpdateMax;
 #endif
 
-
+/*!
+  @brief Update the bounding box for partial updates
+  @param xmin left
+  @param ymin bottom
+  @param xmax right
+  @param ymax top
+ */
 static void updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax, uint8_t ymax) {
 #ifdef enablePartialUpdate
   if (xmin < xUpdateMin) xUpdateMin = xmin;
@@ -101,6 +120,14 @@ static void updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax, uint8_t 
 #endif
 }
 
+/*!
+  @brief Constructor for software SPI with explicit CS pin
+  @param SCLK SCLK pin
+  @param DIN  DIN pin
+  @param DC   DC pin
+  @param CS   CS pin
+  @param RST  RST pin
+ */
 Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC,
     int8_t CS, int8_t RST) : Adafruit_GFX(LCDWIDTH, LCDHEIGHT) {
   _din = DIN;
@@ -110,6 +137,13 @@ Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC,
   _cs = CS;
 }
 
+/*!
+  @brief Constructor for software SPI with CS tied to ground. Saves a pin but other pins can't be shared with other hardware.
+  @param SCLK SCLK pin
+  @param DIN  DIN pin
+  @param DC   DC pin
+  @param RST  RST pin
+ */
 Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC,
     int8_t RST) : Adafruit_GFX(LCDWIDTH, LCDHEIGHT) {
   _din = DIN;
@@ -119,6 +153,13 @@ Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC,
   _cs = -1;
 }
 
+/*!
+  @brief Constructor for hardware SPI based on hardware controlled SCK (SCLK) and MOSI (DIN) pins. CS is still controlled by any IO pin.
+         NOTE: MISO and SS will be set as an input and output respectively, so be careful sharing those pins!
+  @param DC  DC pin
+  @param CS  CS pin
+  @param RST RST pin
+ */
 Adafruit_PCD8544::Adafruit_PCD8544(int8_t DC, int8_t CS, int8_t RST):
   Adafruit_GFX(LCDWIDTH, LCDHEIGHT) {
   // -1 for din and sclk specify using hardware SPI
@@ -129,8 +170,12 @@ Adafruit_PCD8544::Adafruit_PCD8544(int8_t DC, int8_t CS, int8_t RST):
   _cs = CS;
 }
 
-
-// the most basic function, set a single pixel
+/*!
+  @brief The most basic function, set a single pixel
+  @param x     x coord
+  @param y     y coord
+  @param color pixel color (BLACK or WHITE)
+ */
 void Adafruit_PCD8544::drawPixel(int16_t x, int16_t y, uint16_t color) {
   if ((x < 0) || (x >= _width) || (y < 0) || (y >= _height))
     return;
@@ -157,23 +202,30 @@ void Adafruit_PCD8544::drawPixel(int16_t x, int16_t y, uint16_t color) {
     return;
 
   // x is which column
-  if (color) 
-    pcd8544_buffer[x+ (y/8)*LCDWIDTH] |= _BV(y%8);  
+  if (color)
+    pcd8544_buffer[x+ (y/8)*LCDWIDTH] |= _BV(y%8);
   else
-    pcd8544_buffer[x+ (y/8)*LCDWIDTH] &= ~_BV(y%8); 
+    pcd8544_buffer[x+ (y/8)*LCDWIDTH] &= ~_BV(y%8);
 
   updateBoundingBox(x,y,x,y);
 }
 
-
-// the most basic function, get a single pixel
+/*!
+  @brief The most basic function, get a single pixel
+  @param  x x coord
+  @param  y y coord
+  @return   color of the pixel at x,y
+ */
 uint8_t Adafruit_PCD8544::getPixel(int8_t x, int8_t y) {
   if ((x < 0) || (x >= LCDWIDTH) || (y < 0) || (y >= LCDHEIGHT))
     return 0;
 
-  return (pcd8544_buffer[x+ (y/8)*LCDWIDTH] >> (y%8)) & 0x1;  
+  return (pcd8544_buffer[x+ (y/8)*LCDWIDTH] >> (y%8)) & 0x1;
 }
 
+/*!
+  @brief Initialize the display. Set bias and contrast, enter normal mode.
+ */
 void Adafruit_PCD8544::initDisplay()
 {
 
@@ -194,6 +246,11 @@ void Adafruit_PCD8544::initDisplay()
   command(PCD8544_DISPLAYCONTROL | PCD8544_DISPLAYNORMAL);
 }
 
+/*!
+  @brief Set up SPI, initialize the display, set the bounding box
+  @param contrast Initial contrast value
+  @param bias     Initial bias value
+ */
 void Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
   if (isHardwareSPI()) {
     // Setup hardware SPI.
@@ -241,7 +298,10 @@ void Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
   display();
 }
 
-
+/*!
+  @brief Write a byte to SPI
+  @param d Byte to write
+ */
 inline void Adafruit_PCD8544::spiWrite(uint8_t d) {
   if (isHardwareSPI()) {
     // Hardware SPI write.
@@ -258,10 +318,18 @@ inline void Adafruit_PCD8544::spiWrite(uint8_t d) {
   }
 }
 
+/*!
+  @brief  Using hardware or software SPI?
+  @return True if hardware SPI, false if not
+ */
 bool Adafruit_PCD8544::isHardwareSPI() {
   return (_din == -1 && _sclk == -1);
 }
 
+/*!
+  @brief  Send a command to the LCD
+  @param c Command byte
+ */
 void Adafruit_PCD8544::command(uint8_t c) {
   digitalWrite(_dc, LOW);
   if (_cs > 0)
@@ -271,6 +339,10 @@ void Adafruit_PCD8544::command(uint8_t c) {
     digitalWrite(_cs, HIGH);
 }
 
+/*!
+  @brief  Send data to the LCD
+  @param c Data byte
+ */
 void Adafruit_PCD8544::data(uint8_t c) {
   digitalWrite(_dc, HIGH);
   if (_cs > 0)
@@ -280,17 +352,25 @@ void Adafruit_PCD8544::data(uint8_t c) {
     digitalWrite(_cs, HIGH);
 }
 
+/*!
+  @brief  Set the contrast level
+  @param val Contrast value
+ */
 void Adafruit_PCD8544::setContrast(uint8_t val) {
   if (val > 0x7f) {
     val = 0x7f;
   }
   _contrast = val;
   command(PCD8544_FUNCTIONSET | PCD8544_EXTENDEDINSTRUCTION );
-  command( PCD8544_SETVOP | val); 
+  command( PCD8544_SETVOP | val);
   command(PCD8544_FUNCTIONSET);
-  
+
  }
 
+ /*!
+   @brief  Set the bias level
+   @param val Bias value
+  */
 void Adafruit_PCD8544::setBias(uint8_t val) {
   if (val > 0x07) {
     val = 0x07;
@@ -301,24 +381,44 @@ void Adafruit_PCD8544::setBias(uint8_t val) {
   command(PCD8544_FUNCTIONSET);
 }
 
+/*!
+  @brief  Get the bias level
+  @return Bias value
+ */
 uint8_t Adafruit_PCD8544::getBias()
 {
   return _bias;
 }
 
+/*!
+  @brief  Get the contrast level
+  @return Contrast value
+ */
 uint8_t Adafruit_PCD8544::getContrast()
 {
   return _contrast;
 }
 
+/*!
+  @brief  Set the interval for reinitializing the display
+  @param val Reinit after this many calls to display()
+ */
 void Adafruit_PCD8544::setReinitInterval(uint8_t val) {
     _reinit_interval = val;
 }
+
+/*!
+  @brief  Get the reinit interval
+  @return Reinit interval
+ */
 uint8_t Adafruit_PCD8544::getReinitInterval()
 {
   return _reinit_interval;
 }
 
+/*!
+  @brief Update the display
+ */
 void Adafruit_PCD8544::display(void) {
   uint8_t col, maxcol, p;
 
@@ -383,7 +483,9 @@ void Adafruit_PCD8544::display(void) {
 
 }
 
-// clear everything
+/*!
+  @brief Clear the entire display
+ */
 void Adafruit_PCD8544::clearDisplay(void) {
   memset(pcd8544_buffer, 0, LCDWIDTH*LCDHEIGHT/8);
   updateBoundingBox(0, 0, LCDWIDTH-1, LCDHEIGHT-1);
@@ -393,9 +495,9 @@ void Adafruit_PCD8544::clearDisplay(void) {
 /*
 // this doesnt touch the buffer, just clears the display RAM - might be handy
 void Adafruit_PCD8544::clearDisplay(void) {
-  
+
   uint8_t p, c;
-  
+
   for(p = 0; p < 8; p++) {
 
     st7565_command(CMD_SET_PAGE | p);
@@ -405,7 +507,7 @@ void Adafruit_PCD8544::clearDisplay(void) {
       st7565_command(CMD_SET_COLUMN_LOWER | (c & 0xf));
       st7565_command(CMD_SET_COLUMN_UPPER | ((c >> 4) & 0xf));
       st7565_data(0x0);
-    }     
+    }
     }
 
 }
