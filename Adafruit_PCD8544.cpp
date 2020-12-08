@@ -131,6 +131,12 @@ static void updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax,
     yUpdateMin = ymin;
   if (ymax > yUpdateMax)
     yUpdateMax = ymax;
+#else
+  // Disable -Wunused-parameter warnings.
+  (void)xmin;
+  (void)ymin;
+  (void)xmax;
+  (void)ymax;
 #endif
 }
 
