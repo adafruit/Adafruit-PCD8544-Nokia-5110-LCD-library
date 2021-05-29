@@ -91,6 +91,7 @@ public:
   uint8_t getPixel(int8_t x, int8_t y);
 
   void initDisplay();
+  void invertDisplay(bool i);
 
 private:
   Adafruit_SPIDevice *spi_dev = NULL;

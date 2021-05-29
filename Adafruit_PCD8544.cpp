@@ -361,3 +361,13 @@ void Adafruit_PCD8544::clearDisplay(void) {
   updateBoundingBox(0, 0, LCDWIDTH - 1, LCDHEIGHT - 1);
   cursor_y = cursor_x = 0;
 }
+
+
+/*!
+  @brief Invert the entire display
+  @param i True to invert the display, false to keep it uninverted
+ */
+void Adafruit_PCD8544::invertDisplay(bool i) {
+  command(PCD8544_FUNCTIONSET);
+  command(PCD8544_DISPLAYCONTROL | (i ? PCD8544_DISPLAYINVERTED : PCD8544_DISPLAYNORMAL));
+}
