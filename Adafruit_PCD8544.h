@@ -22,26 +22,10 @@
 #ifndef _ADAFRUIT_PCD8544_H
 #define _ADAFRUIT_PCD8544_H
 
-#if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
-#else
-#include "WProgram.h"
-#include "pins_arduino.h"
-#endif
-
 #include <Adafruit_GFX.h>
+#include <Adafruit_SPIDevice.h>
 #include <SPI.h>
-
-#if defined(__SAM3X8E__) || defined(ARDUINO_ARCH_SAMD)
-typedef volatile RwReg PortReg; ///< PortReg for SAMD
-typedef uint32_t PortMask;      ///< PortMask for SAMD
-#elif defined(__AVR__)
-typedef volatile uint8_t PortReg; ///< PortReg for AVR
-typedef uint8_t PortMask;         ///< PortMask for AVR
-#else
-typedef volatile uint32_t PortReg; ///< PortReg for other chips
-typedef uint32_t PortMask;         ///< PortMask for other chips
-#endif
 
 #define BLACK 1 ///< Black pixel
 #define WHITE 0 ///< White pixel
@@ -73,59 +57,55 @@ typedef uint32_t PortMask;         ///< PortMask for other chips
 #define PCD8544_SETVOP                                                         \
   0x80 ///< Extended instruction set - Write Vop to register
 
-#define PCD8544_SPI_CLOCK_DIV                                                  \
-  SPI_CLOCK_DIV4 ///< Default to max SPI clock speed for PCD8544 of 4 mhz (16mhz
-                 ///< / 4) for normal Arduinos. This can be modified to change
-                 ///< the clock speed if necessary (like for supporting other
-                 ///< hardware).
-
 /**************************************************************************/
 /*!
     @brief The PCD8544 LCD class
  */
 class Adafruit_PCD8544 : public Adafruit_GFX {
 public:
-  Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS, int8_t RST);
-  Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST);
-  Adafruit_PCD8544(int8_t DC, int8_t CS, int8_t RST);
+  Adafruit_PCD8544(int8_t sclk_pin, int8_t din_pin, int8_t dc_pin,
+                   int8_t cs_pin, int8_t rst_pin);
+  Adafruit_PCD8544(int8_t dc_pin, int8_t cs_pin, int8_t rst_pin,
+                   SPIClass *theSPI = &SPI);
 
-  void begin(uint8_t contrast = 40, uint8_t bias = 0x04);
+  bool begin(uint8_t contrast = 40, uint8_t bias = 0x04);
 
   void command(uint8_t c);
   void data(uint8_t c);
 
   void setContrast(uint8_t val);
-  void setBias(uint8_t val);
   uint8_t getContrast(void);
+
   uint8_t getBias(void);
+  void setBias(uint8_t val);
+
   void clearDisplay(void);
   void display();
+  void updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax,
+                         uint8_t ymax);
+
   void setReinitInterval(uint8_t val);
   uint8_t getReinitInterval(void);
 
   void drawPixel(int16_t x, int16_t y, uint16_t color);
-  uint8_t getPixel(int8_t x, int8_t y);
+  void setPixel(int16_t x, int16_t y, bool color, uint8_t *buffer);
+  bool getPixel(int16_t x, int16_t y, uint8_t *buffer);
 
   void initDisplay();
+  void invertDisplay(bool i);
+  void scroll(int8_t vpixels, int8_t hpixels);
 
 private:
-  int8_t _din;              ///< DIN pin
-  int8_t _sclk;             ///< SCLK pin
-  int8_t _dc;               ///< DC pin
-  int8_t _rst;              ///< RST pin
-  int8_t _cs;               ///< CS pin
+  Adafruit_SPIDevice *spi_dev = NULL;
+  int8_t _rstpin = -1, _dcpin = -1;
+
   uint8_t _contrast;        ///< Contrast level, Vop
   uint8_t _bias;            ///< Bias value
   uint8_t _reinit_interval; ///< Reinitialize the display after this many calls
                             ///< to display()
   uint8_t _display_count;   ///< Count for reinit interval
-  volatile PortReg *mosiport; ///< MOSI port
-  volatile PortReg *clkport;  ///< CLK port
-  PortMask mosipinmask;       ///< MOSI port mask
-  PortMask clkpinmask;        ///< CLK port mask
 
-  void spiWrite(uint8_t c);
-  bool isHardwareSPI();
+  uint8_t xUpdateMin, xUpdateMax, yUpdateMin, yUpdateMax;
 };
 
 #endif
