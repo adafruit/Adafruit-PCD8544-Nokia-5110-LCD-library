@@ -90,10 +90,6 @@ uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
 // optimized
 //#define enablePartialUpdate
 
-#ifdef enablePartialUpdate
-static uint8_t xUpdateMin, xUpdateMax, yUpdateMin, yUpdateMax;
-#endif
-
 /*!
   @brief Update the bounding box for partial updates
   @param xmin left
@@ -101,24 +97,12 @@ static uint8_t xUpdateMin, xUpdateMax, yUpdateMin, yUpdateMax;
   @param xmax right
   @param ymax top
  */
-static void updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax,
-                              uint8_t ymax) {
-#ifdef enablePartialUpdate
-  if (xmin < xUpdateMin)
-    xUpdateMin = xmin;
-  if (xmax > xUpdateMax)
-    xUpdateMax = xmax;
-  if (ymin < yUpdateMin)
-    yUpdateMin = ymin;
-  if (ymax > yUpdateMax)
-    yUpdateMax = ymax;
-#else
-  // Disable -Wunused-parameter warnings.
-  (void)xmin;
-  (void)ymin;
-  (void)xmax;
-  (void)ymax;
-#endif
+void Adafruit_PCD8544::updateBoundingBox(uint8_t xmin, uint8_t ymin,
+                       uint8_t xmax, uint8_t ymax) {
+    xUpdateMin = min(xUpdateMin, xmin);
+    xUpdateMax = max(xUpdateMax, xmax);
+    yUpdateMin = min(yUpdateMin, ymin);
+    yUpdateMax = max(yUpdateMax, ymax);
 }
 
 /*!
@@ -132,7 +116,7 @@ static void updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax,
 Adafruit_PCD8544::Adafruit_PCD8544(int8_t sclk_pin, int8_t din_pin, int8_t dc_pin,
                                    int8_t cs_pin, int8_t rst_pin)
     : Adafruit_GFX(LCDWIDTH, LCDHEIGHT) {
-  spi_dev = new Adafruit_SPIDevice(cs_pin, sclk_pin, -1, din_pin, 1000000);
+  spi_dev = new Adafruit_SPIDevice(cs_pin, sclk_pin, -1, din_pin, 4000000); // 4mhz max speed
 
   _dcpin = dc_pin;
   _rstpin = rst_pin;
@@ -150,7 +134,7 @@ Adafruit_PCD8544::Adafruit_PCD8544(int8_t sclk_pin, int8_t din_pin, int8_t dc_pi
  */
 Adafruit_PCD8544::Adafruit_PCD8544(int8_t dc_pin, int8_t cs_pin, int8_t rst_pin, SPIClass *theSPI)
     : Adafruit_GFX(LCDWIDTH, LCDHEIGHT) {
-  spi_dev = new Adafruit_SPIDevice(cs_pin, 1000000, SPI_BITORDER_MSBFIRST, SPI_MODE0, theSPI);
+  spi_dev = new Adafruit_SPIDevice(cs_pin, 4000000, SPI_BITORDER_MSBFIRST, SPI_MODE0, theSPI);
 
   _dcpin = dc_pin;
   _rstpin = rst_pin;
@@ -189,9 +173,9 @@ void Adafruit_PCD8544::drawPixel(int16_t x, int16_t y, uint16_t color) {
 
   // x is which column
   if (color)
-    pcd8544_buffer[x + (y / 8) * LCDWIDTH] |= _BV(y % 8);
+    pcd8544_buffer[x + (y / 8) * LCDWIDTH] |= 1 << (y % 8);
   else
-    pcd8544_buffer[x + (y / 8) * LCDWIDTH] &= ~_BV(y % 8);
+    pcd8544_buffer[x + (y / 8) * LCDWIDTH] &= ~(1 << (y % 8));
 
   updateBoundingBox(x, y, x, y);
 }
@@ -385,7 +369,7 @@ void Adafruit_PCD8544::display(void) {
     command(PCD8544_SETXADDR | col);
 
     digitalWrite(_dcpin, HIGH);
-    spi_dev->write(pcd8544_buffer+(LCDWIDTH * p), maxcol-col);
+    spi_dev->write(pcd8544_buffer+(LCDWIDTH * p), maxcol-col+1);
     /*
     digitalWrite(_cs, LOW);
     for (; col <= maxcol; col++) {

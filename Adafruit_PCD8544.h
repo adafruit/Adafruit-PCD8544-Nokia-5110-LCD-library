@@ -80,6 +80,9 @@ public:
 
   void clearDisplay(void);
   void display();
+  void updateBoundingBox(uint8_t xmin, uint8_t ymin,
+                         uint8_t xmax, uint8_t ymax);
+
   void setReinitInterval(uint8_t val);
   uint8_t getReinitInterval(void);
 
@@ -97,6 +100,8 @@ private:
   uint8_t _reinit_interval; ///< Reinitialize the display after this many calls
                             ///< to display()
   uint8_t _display_count;   ///< Count for reinit interval
+
+  uint8_t xUpdateMin, xUpdateMax, yUpdateMin, yUpdateMax;
 };
 
 #endif
