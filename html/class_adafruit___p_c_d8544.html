@@ -81,18 +81,15 @@ Inheritance diagram for Adafruit_PCD8544:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a4950da8b5d0d370019debbaff6b6afe2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___p_c_d8544.html#a4950da8b5d0d370019debbaff6b6afe2">Adafruit_PCD8544</a> (int8_t SCLK, int8_t DIN, int8_t DC, int8_t CS, int8_t RST)</td></tr>
-<tr class="memdesc:a4950da8b5d0d370019debbaff6b6afe2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor for software SPI with explicit CS pin.  <a href="#a4950da8b5d0d370019debbaff6b6afe2">More...</a><br /></td></tr>
-<tr class="separator:a4950da8b5d0d370019debbaff6b6afe2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac4c1c343c99cf2dd4eb1ca6cdc0eb76a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___p_c_d8544.html#ac4c1c343c99cf2dd4eb1ca6cdc0eb76a">Adafruit_PCD8544</a> (int8_t SCLK, int8_t DIN, int8_t DC, int8_t RST)</td></tr>
-<tr class="memdesc:ac4c1c343c99cf2dd4eb1ca6cdc0eb76a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor for software SPI with CS tied to ground. Saves a pin but other pins can't be shared with other hardware.  <a href="#ac4c1c343c99cf2dd4eb1ca6cdc0eb76a">More...</a><br /></td></tr>
-<tr class="separator:ac4c1c343c99cf2dd4eb1ca6cdc0eb76a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abaa85482a50816199d8aed46170ace0c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___p_c_d8544.html#abaa85482a50816199d8aed46170ace0c">Adafruit_PCD8544</a> (int8_t DC, int8_t CS, int8_t RST)</td></tr>
-<tr class="memdesc:abaa85482a50816199d8aed46170ace0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor for hardware SPI based on hardware controlled SCK (SCLK) and MOSI (DIN) pins. CS is still controlled by any IO pin. NOTE: MISO and SS will be set as an input and output respectively, so be careful sharing those pins!  <a href="#abaa85482a50816199d8aed46170ace0c">More...</a><br /></td></tr>
-<tr class="separator:abaa85482a50816199d8aed46170ace0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af02b9173c64a7a78b32ff7e5c1d472ea"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___p_c_d8544.html#af02b9173c64a7a78b32ff7e5c1d472ea">begin</a> (uint8_t contrast=40, uint8_t bias=0x04)</td></tr>
-<tr class="memdesc:af02b9173c64a7a78b32ff7e5c1d472ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up SPI, initialize the display, set the bounding box.  <a href="#af02b9173c64a7a78b32ff7e5c1d472ea">More...</a><br /></td></tr>
-<tr class="separator:af02b9173c64a7a78b32ff7e5c1d472ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c33abcd850e72ee9e54541a487e1510"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___p_c_d8544.html#a5c33abcd850e72ee9e54541a487e1510">Adafruit_PCD8544</a> (int8_t sclk_pin, int8_t din_pin, int8_t dc_pin, int8_t cs_pin, int8_t rst_pin)</td></tr>
+<tr class="memdesc:a5c33abcd850e72ee9e54541a487e1510"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor for software SPI with explicit CS pin.  <a href="#a5c33abcd850e72ee9e54541a487e1510">More...</a><br /></td></tr>
+<tr class="separator:a5c33abcd850e72ee9e54541a487e1510"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6122cc4a15a866026522ebe5b2906d9a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___p_c_d8544.html#a6122cc4a15a866026522ebe5b2906d9a">Adafruit_PCD8544</a> (int8_t dc_pin, int8_t cs_pin, int8_t rst_pin, SPIClass *theSPI=&amp;SPI)</td></tr>
+<tr class="memdesc:a6122cc4a15a866026522ebe5b2906d9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor for hardware SPI based on hardware controlled SCK (SCLK) and MOSI (DIN) pins. CS is still controlled by any IO pin. NOTE: MISO and SS will be set as an input and output respectively, so be careful sharing those pins!  <a href="#a6122cc4a15a866026522ebe5b2906d9a">More...</a><br /></td></tr>
+<tr class="separator:a6122cc4a15a866026522ebe5b2906d9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4def5ca5bdcc1607c34c104bf3362f41"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___p_c_d8544.html#a4def5ca5bdcc1607c34c104bf3362f41">begin</a> (uint8_t contrast=40, uint8_t bias=0x04)</td></tr>
+<tr class="memdesc:a4def5ca5bdcc1607c34c104bf3362f41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up SPI, initialize the display, set the bounding box.  <a href="#a4def5ca5bdcc1607c34c104bf3362f41">More...</a><br /></td></tr>
+<tr class="separator:a4def5ca5bdcc1607c34c104bf3362f41"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a058bbd301aa471d842f194e311b3fae5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___p_c_d8544.html#a058bbd301aa471d842f194e311b3fae5">command</a> (uint8_t c)</td></tr>
 <tr class="memdesc:a058bbd301aa471d842f194e311b3fae5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send a command to the LCD.  <a href="#a058bbd301aa471d842f194e311b3fae5">More...</a><br /></td></tr>
 <tr class="separator:a058bbd301aa471d842f194e311b3fae5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -102,15 +99,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a117a5ab05a6d9c769a4dccde1a31ba68"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___p_c_d8544.html#a117a5ab05a6d9c769a4dccde1a31ba68">setContrast</a> (uint8_t val)</td></tr>
 <tr class="memdesc:a117a5ab05a6d9c769a4dccde1a31ba68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the contrast level.  <a href="#a117a5ab05a6d9c769a4dccde1a31ba68">More...</a><br /></td></tr>
 <tr class="separator:a117a5ab05a6d9c769a4dccde1a31ba68"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a657a51185881e20d747c2993fd0aa5e6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___p_c_d8544.html#a657a51185881e20d747c2993fd0aa5e6">setBias</a> (uint8_t val)</td></tr>
-<tr class="memdesc:a657a51185881e20d747c2993fd0aa5e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the bias level.  <a href="#a657a51185881e20d747c2993fd0aa5e6">More...</a><br /></td></tr>
-<tr class="separator:a657a51185881e20d747c2993fd0aa5e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70216ba1caac65c846991ef0155aaa69"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___p_c_d8544.html#a70216ba1caac65c846991ef0155aaa69">getContrast</a> (void)</td></tr>
 <tr class="memdesc:a70216ba1caac65c846991ef0155aaa69"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the contrast level.  <a href="#a70216ba1caac65c846991ef0155aaa69">More...</a><br /></td></tr>
 <tr class="separator:a70216ba1caac65c846991ef0155aaa69"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90874382f4f6d6e95eb9ca86f0bd3498"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___p_c_d8544.html#a90874382f4f6d6e95eb9ca86f0bd3498">getBias</a> (void)</td></tr>
 <tr class="memdesc:a90874382f4f6d6e95eb9ca86f0bd3498"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the bias level.  <a href="#a90874382f4f6d6e95eb9ca86f0bd3498">More...</a><br /></td></tr>
 <tr class="separator:a90874382f4f6d6e95eb9ca86f0bd3498"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a657a51185881e20d747c2993fd0aa5e6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___p_c_d8544.html#a657a51185881e20d747c2993fd0aa5e6">setBias</a> (uint8_t val)</td></tr>
+<tr class="memdesc:a657a51185881e20d747c2993fd0aa5e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the bias level.  <a href="#a657a51185881e20d747c2993fd0aa5e6">More...</a><br /></td></tr>
+<tr class="separator:a657a51185881e20d747c2993fd0aa5e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a11710149003db112454eacf91206d7fe"><td class="memItemLeft" align="right" valign="top"><a id="a11710149003db112454eacf91206d7fe"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___p_c_d8544.html#a11710149003db112454eacf91206d7fe">clearDisplay</a> (void)</td></tr>
 <tr class="memdesc:a11710149003db112454eacf91206d7fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear the entire display. <br /></td></tr>
@@ -119,6 +116,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___p_c_d8544.html#abc7eda70aba9c28a699ab7202a4210c0">display</a> ()</td></tr>
 <tr class="memdesc:abc7eda70aba9c28a699ab7202a4210c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the display. <br /></td></tr>
 <tr class="separator:abc7eda70aba9c28a699ab7202a4210c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a520a3a525fa2b3b985bf31fdc2b57a51"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___p_c_d8544.html#a520a3a525fa2b3b985bf31fdc2b57a51">updateBoundingBox</a> (uint8_t xmin, uint8_t ymin, uint8_t xmax, uint8_t ymax)</td></tr>
+<tr class="memdesc:a520a3a525fa2b3b985bf31fdc2b57a51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the bounding box for partial updates.  <a href="#a520a3a525fa2b3b985bf31fdc2b57a51">More...</a><br /></td></tr>
+<tr class="separator:a520a3a525fa2b3b985bf31fdc2b57a51"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1d3e0c6138e184efddb6ab6c1073bfc3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___p_c_d8544.html#a1d3e0c6138e184efddb6ab6c1073bfc3">setReinitInterval</a> (uint8_t val)</td></tr>
 <tr class="memdesc:a1d3e0c6138e184efddb6ab6c1073bfc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the interval for reinitializing the display.  <a href="#a1d3e0c6138e184efddb6ab6c1073bfc3">More...</a><br /></td></tr>
 <tr class="separator:a1d3e0c6138e184efddb6ab6c1073bfc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -139,8 +139,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The PCD8544 LCD class. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a4950da8b5d0d370019debbaff6b6afe2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4950da8b5d0d370019debbaff6b6afe2">&#9670;&nbsp;</a></span>Adafruit_PCD8544() <span class="overload">[1/3]</span></h2>
+<a id="a5c33abcd850e72ee9e54541a487e1510"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5c33abcd850e72ee9e54541a487e1510">&#9670;&nbsp;</a></span>Adafruit_PCD8544() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -149,31 +149,31 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
           <td class="memname">Adafruit_PCD8544::Adafruit_PCD8544 </td>
           <td>(</td>
           <td class="paramtype">int8_t&#160;</td>
-          <td class="paramname"><em>SCLK</em>, </td>
+          <td class="paramname"><em>sclk_pin</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int8_t&#160;</td>
-          <td class="paramname"><em>DIN</em>, </td>
+          <td class="paramname"><em>din_pin</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int8_t&#160;</td>
-          <td class="paramname"><em>DC</em>, </td>
+          <td class="paramname"><em>dc_pin</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int8_t&#160;</td>
-          <td class="paramname"><em>CS</em>, </td>
+          <td class="paramname"><em>cs_pin</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int8_t&#160;</td>
-          <td class="paramname"><em>RST</em>&#160;</td>
+          <td class="paramname"><em>rst_pin</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -186,19 +186,19 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <p>Constructor for software SPI with explicit CS pin. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">SCLK</td><td>SCLK pin </td></tr>
-    <tr><td class="paramname">DIN</td><td>DIN pin </td></tr>
-    <tr><td class="paramname">DC</td><td>DC pin </td></tr>
-    <tr><td class="paramname">CS</td><td>CS pin </td></tr>
-    <tr><td class="paramname">RST</td><td>RST pin </td></tr>
+    <tr><td class="paramname">sclk_pin</td><td>SCLK pin </td></tr>
+    <tr><td class="paramname">din_pin</td><td>DIN pin </td></tr>
+    <tr><td class="paramname">dc_pin</td><td>DC pin </td></tr>
+    <tr><td class="paramname">cs_pin</td><td>CS pin </td></tr>
+    <tr><td class="paramname">rst_pin</td><td>RST pin </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="ac4c1c343c99cf2dd4eb1ca6cdc0eb76a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac4c1c343c99cf2dd4eb1ca6cdc0eb76a">&#9670;&nbsp;</a></span>Adafruit_PCD8544() <span class="overload">[2/3]</span></h2>
+<a id="a6122cc4a15a866026522ebe5b2906d9a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6122cc4a15a866026522ebe5b2906d9a">&#9670;&nbsp;</a></span>Adafruit_PCD8544() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -207,70 +207,25 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
           <td class="memname">Adafruit_PCD8544::Adafruit_PCD8544 </td>
           <td>(</td>
           <td class="paramtype">int8_t&#160;</td>
-          <td class="paramname"><em>SCLK</em>, </td>
+          <td class="paramname"><em>dc_pin</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int8_t&#160;</td>
-          <td class="paramname"><em>DIN</em>, </td>
+          <td class="paramname"><em>cs_pin</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int8_t&#160;</td>
-          <td class="paramname"><em>DC</em>, </td>
+          <td class="paramname"><em>rst_pin</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int8_t&#160;</td>
-          <td class="paramname"><em>RST</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Constructor for software SPI with CS tied to ground. Saves a pin but other pins can't be shared with other hardware. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">SCLK</td><td>SCLK pin </td></tr>
-    <tr><td class="paramname">DIN</td><td>DIN pin </td></tr>
-    <tr><td class="paramname">DC</td><td>DC pin </td></tr>
-    <tr><td class="paramname">RST</td><td>RST pin </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="abaa85482a50816199d8aed46170ace0c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abaa85482a50816199d8aed46170ace0c">&#9670;&nbsp;</a></span>Adafruit_PCD8544() <span class="overload">[3/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">Adafruit_PCD8544::Adafruit_PCD8544 </td>
-          <td>(</td>
-          <td class="paramtype">int8_t&#160;</td>
-          <td class="paramname"><em>DC</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int8_t&#160;</td>
-          <td class="paramname"><em>CS</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int8_t&#160;</td>
-          <td class="paramname"><em>RST</em>&#160;</td>
+          <td class="paramtype">SPIClass *&#160;</td>
+          <td class="paramname"><em>theSPI</em> = <code>&amp;SPI</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -283,9 +238,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <p>Constructor for hardware SPI based on hardware controlled SCK (SCLK) and MOSI (DIN) pins. CS is still controlled by any IO pin. NOTE: MISO and SS will be set as an input and output respectively, so be careful sharing those pins! </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">DC</td><td>DC pin </td></tr>
-    <tr><td class="paramname">CS</td><td>CS pin </td></tr>
-    <tr><td class="paramname">RST</td><td>RST pin </td></tr>
+    <tr><td class="paramname">dc_pin</td><td>DC pin </td></tr>
+    <tr><td class="paramname">cs_pin</td><td>CS pin </td></tr>
+    <tr><td class="paramname">rst_pin</td><td>RST pin </td></tr>
+    <tr><td class="paramname">theSPI</td><td>Pointer to SPIClass device for hardware SPI </td></tr>
   </table>
   </dd>
 </dl>
@@ -293,14 +249,14 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="af02b9173c64a7a78b32ff7e5c1d472ea"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af02b9173c64a7a78b32ff7e5c1d472ea">&#9670;&nbsp;</a></span>begin()</h2>
+<a id="a4def5ca5bdcc1607c34c104bf3362f41"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4def5ca5bdcc1607c34c104bf3362f41">&#9670;&nbsp;</a></span>begin()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void Adafruit_PCD8544::begin </td>
+          <td class="memname">bool Adafruit_PCD8544::begin </td>
           <td>(</td>
           <td class="paramtype">uint8_t&#160;</td>
           <td class="paramname"><em>contrast</em> = <code>40</code>, </td>
@@ -327,6 +283,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>True on initialization success </dd></dl>
 
 </div>
 </div>
@@ -408,32 +365,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 
 </div>
 </div>
-<a id="a657a51185881e20d747c2993fd0aa5e6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a657a51185881e20d747c2993fd0aa5e6">&#9670;&nbsp;</a></span>setBias()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void Adafruit_PCD8544::setBias </td>
-          <td>(</td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>val</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Set the bias level. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">val</td><td>Bias value </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a70216ba1caac65c846991ef0155aaa69"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a70216ba1caac65c846991ef0155aaa69">&#9670;&nbsp;</a></span>getContrast()</h2>
 
@@ -473,6 +404,83 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 
 <p>Get the bias level. </p>
 <dl class="section return"><dt>Returns</dt><dd>Bias value </dd></dl>
+
+</div>
+</div>
+<a id="a657a51185881e20d747c2993fd0aa5e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a657a51185881e20d747c2993fd0aa5e6">&#9670;&nbsp;</a></span>setBias()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Adafruit_PCD8544::setBias </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>val</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Set the bias level. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">val</td><td>Bias value </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a520a3a525fa2b3b985bf31fdc2b57a51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a520a3a525fa2b3b985bf31fdc2b57a51">&#9670;&nbsp;</a></span>updateBoundingBox()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Adafruit_PCD8544::updateBoundingBox </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>xmin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>ymin</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>xmax</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>ymax</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Update the bounding box for partial updates. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">xmin</td><td>left </td></tr>
+    <tr><td class="paramname">ymin</td><td>bottom </td></tr>
+    <tr><td class="paramname">xmax</td><td>right </td></tr>
+    <tr><td class="paramname">ymax</td><td>top </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

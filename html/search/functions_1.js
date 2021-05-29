@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['begin',['begin',['../class_adafruit___p_c_d8544.html#af02b9173c64a7a78b32ff7e5c1d472ea',1,'Adafruit_PCD8544']]]
+  ['begin',['begin',['../class_adafruit___p_c_d8544.html#a4def5ca5bdcc1607c34c104bf3362f41',1,'Adafruit_PCD8544']]]
 ];
