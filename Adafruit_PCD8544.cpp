@@ -191,7 +191,7 @@ void Adafruit_PCD8544::setPixel(int16_t x, int16_t y, bool color,
  */
 bool Adafruit_PCD8544::getPixel(int16_t x, int16_t y, uint8_t *buffer) {
   if ((x < 0) || (x >= _width) || (y < 0) || (y >= _height))
-    return;
+    return false;
 
   int16_t t;
   switch (rotation) {
