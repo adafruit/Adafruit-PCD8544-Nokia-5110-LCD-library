@@ -135,12 +135,25 @@ Adafruit_PCD8544::Adafruit_PCD8544(int8_t dc_pin, int8_t cs_pin, int8_t rst_pin,
 }
 
 /*!
-  @brief The most basic function, set a single pixel
+  @brief The most basic function, set a single pixel, in the main buffer
   @param x     x coord
   @param y     y coord
   @param color pixel color (BLACK or WHITE)
  */
 void Adafruit_PCD8544::drawPixel(int16_t x, int16_t y, uint16_t color) {
+  setPixel(x, y, color, pcd8544_buffer);
+  updateBoundingBox(x, y, x, y);
+}
+
+/*!
+  @brief The most basic function, set a single pixel
+  @param x     x coord
+  @param y     y coord
+  @param color pixel color (BLACK or WHITE)
+  @param buffer The framebuffer to set the pixel in
+ */
+void Adafruit_PCD8544::setPixel(int16_t x, int16_t y, bool color,
+                                uint8_t *buffer) {
   if ((x < 0) || (x >= _width) || (y < 0) || (y >= _height))
     return;
 
@@ -162,29 +175,43 @@ void Adafruit_PCD8544::drawPixel(int16_t x, int16_t y, uint16_t color) {
     break;
   }
 
-  if ((x < 0) || (x >= LCDWIDTH) || (y < 0) || (y >= LCDHEIGHT))
-    return;
-
   // x is which column
   if (color)
-    pcd8544_buffer[x + (y / 8) * LCDWIDTH] |= 1 << (y % 8);
+    buffer[x + (y / 8) * LCDWIDTH] |= 1 << (y % 8);
   else
-    pcd8544_buffer[x + (y / 8) * LCDWIDTH] &= ~(1 << (y % 8));
-
-  updateBoundingBox(x, y, x, y);
+    buffer[x + (y / 8) * LCDWIDTH] &= ~(1 << (y % 8));
 }
 
 /*!
   @brief The most basic function, get a single pixel
   @param  x x coord
   @param  y y coord
+  @param buffer The framebuffer to get the pixel from
   @return   color of the pixel at x,y
  */
-uint8_t Adafruit_PCD8544::getPixel(int8_t x, int8_t y) {
-  if ((x < 0) || (x >= LCDWIDTH) || (y < 0) || (y >= LCDHEIGHT))
-    return 0;
+bool Adafruit_PCD8544::getPixel(int16_t x, int16_t y, uint8_t *buffer) {
+  if ((x < 0) || (x >= _width) || (y < 0) || (y >= _height))
+    return;
 
-  return (pcd8544_buffer[x + (y / 8) * LCDWIDTH] >> (y % 8)) & 0x1;
+  int16_t t;
+  switch (rotation) {
+  case 1:
+    t = x;
+    x = y;
+    y = LCDHEIGHT - 1 - t;
+    break;
+  case 2:
+    x = LCDWIDTH - 1 - x;
+    y = LCDHEIGHT - 1 - y;
+    break;
+  case 3:
+    t = x;
+    x = LCDWIDTH - 1 - y;
+    y = t;
+    break;
+  }
+
+  return (buffer[x + (y / 8) * LCDWIDTH] >> (y % 8)) & 0x1;
 }
 
 /*!
@@ -362,12 +389,44 @@ void Adafruit_PCD8544::clearDisplay(void) {
   cursor_y = cursor_x = 0;
 }
 
-
 /*!
   @brief Invert the entire display
   @param i True to invert the display, false to keep it uninverted
  */
 void Adafruit_PCD8544::invertDisplay(bool i) {
   command(PCD8544_FUNCTIONSET);
-  command(PCD8544_DISPLAYCONTROL | (i ? PCD8544_DISPLAYINVERTED : PCD8544_DISPLAYNORMAL));
+  command(PCD8544_DISPLAYCONTROL |
+          (i ? PCD8544_DISPLAYINVERTED : PCD8544_DISPLAYNORMAL));
+}
+
+/*!
+  @brief Scroll the display by creating a new buffer and moving each pixel
+  @param xpixels The x offset, can be negative to scroll backwards
+  @param ypixels The y offset, can be negative to scroll updwards
+ */
+void Adafruit_PCD8544::scroll(int8_t xpixels, int8_t ypixels) {
+  uint8_t new_buffer[LCDWIDTH * LCDHEIGHT / 8];
+  memset(new_buffer, 0, LCDWIDTH * LCDHEIGHT / 8);
+
+  // negative pixels wrap around
+  while (ypixels < 0) {
+    ypixels += height();
+  }
+  ypixels %= height();
+  while (xpixels < 0) {
+    xpixels += width();
+  }
+  xpixels %= width();
+
+  for (int x = 0; x < width(); x++) {
+    for (int y = 0; y < height(); y++) {
+      if (getPixel(x, y, pcd8544_buffer)) {
+        int new_x = (x + xpixels) % _width;
+        int new_y = (y + ypixels) % _height;
+        setPixel(new_x, new_y, true, new_buffer);
+      }
+    }
+  }
+  memcpy(pcd8544_buffer, new_buffer, LCDWIDTH * LCDHEIGHT / 8);
+  updateBoundingBox(0, 0, LCDWIDTH - 1, LCDHEIGHT - 1);
 }
