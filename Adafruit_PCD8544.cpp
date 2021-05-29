@@ -31,9 +31,6 @@
  */
 /**************************************************************************/
 
-#ifdef __AVR__
-#include <avr/pgmspace.h>
-#endif
 #include "Adafruit_PCD8544.h"
 #include "Arduino.h"
 #include <stdlib.h>
@@ -83,11 +80,6 @@ uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
-
-// reduces how much is refreshed, which speeds it up!
-// originally derived from Steve Evans/JCW's mod but cleaned up and
-// optimized
-//#define enablePartialUpdate
 
 /*!
   @brief Update the bounding box for partial updates
@@ -222,6 +214,7 @@ void Adafruit_PCD8544::initDisplay() {
   @brief Set up SPI, initialize the display, set the bounding box
   @param contrast Initial contrast value
   @param bias     Initial bias value
+  @returns True on initialization success
  */
 bool Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
 
@@ -330,66 +323,34 @@ uint8_t Adafruit_PCD8544::getReinitInterval() { return _reinit_interval; }
   @brief Update the display
  */
 void Adafruit_PCD8544::display(void) {
-  uint8_t col, maxcol, p;
-
   if (_reinit_interval) {
     _display_count++;
     if (_display_count >= _reinit_interval) {
       _display_count = 0;
       initDisplay();
-#ifdef enablePartialUpdate
-      yUpdateMin = 0;
-      yUpdateMax = LCDHEIGHT - 1;
-      xUpdateMin = 0;
-      xUpdateMax = LCDWIDTH - 1;
-#endif
     }
   }
 
-  for (p = 0; p < 6; p++) {
-#ifdef enablePartialUpdate
-    // check if this page is part of update
-    if (yUpdateMin >= ((p + 1) * 8)) {
-      continue; // nope, skip it!
-    }
-    if (yUpdateMax < p * 8) {
-      break;
-    }
-#endif
+  for (uint8_t page = (yUpdateMin / 8); page < (yUpdateMax / 8) + 1; page++) {
+    command(PCD8544_SETYADDR | page);
 
-    command(PCD8544_SETYADDR | p);
+    uint8_t startcol = xUpdateMin;
+    uint8_t endcol = xUpdateMax;
 
-#ifdef enablePartialUpdate
-    col = xUpdateMin;
-    maxcol = xUpdateMax;
-#else
-    // start at the beginning of the row
-    col = 0;
-    maxcol = LCDWIDTH - 1;
-#endif
-
-    command(PCD8544_SETXADDR | col);
+    command(PCD8544_SETXADDR | startcol);
 
     digitalWrite(_dcpin, HIGH);
-    spi_dev->write(pcd8544_buffer + (LCDWIDTH * p), maxcol - col + 1);
-    /*
-    digitalWrite(_cs, LOW);
-    for (; col <= maxcol; col++) {
-      spiWrite(pcd8544_buffer[(LCDWIDTH * p) + col]);
-    }
-    if (_cs > 0)
-      digitalWrite(_cs, HIGH);
-      */
+    spi_dev->write(pcd8544_buffer + (LCDWIDTH * page) + startcol,
+                   endcol - startcol + 1);
   }
 
   command(PCD8544_SETYADDR); // no idea why this is necessary but it is to
                              // finish the last byte?
-#ifdef enablePartialUpdate
+
   xUpdateMin = LCDWIDTH - 1;
   xUpdateMax = 0;
   yUpdateMin = LCDHEIGHT - 1;
   yUpdateMax = 0;
-#endif
 }
 
 /*!
@@ -400,25 +361,3 @@ void Adafruit_PCD8544::clearDisplay(void) {
   updateBoundingBox(0, 0, LCDWIDTH - 1, LCDHEIGHT - 1);
   cursor_y = cursor_x = 0;
 }
-
-/*
-// this doesnt touch the buffer, just clears the display RAM - might be handy
-void Adafruit_PCD8544::clearDisplay(void) {
-
-  uint8_t p, c;
-
-  for(p = 0; p < 8; p++) {
-
-    st7565_command(CMD_SET_PAGE | p);
-    for(c = 0; c < 129; c++) {
-      //uart_putw_dec(c);
-      //uart_putchar(' ');
-      st7565_command(CMD_SET_COLUMN_LOWER | (c & 0xf));
-      st7565_command(CMD_SET_COLUMN_UPPER | ((c >> 4) & 0xf));
-      st7565_data(0x0);
-    }
-    }
-
-}
-
-*/
