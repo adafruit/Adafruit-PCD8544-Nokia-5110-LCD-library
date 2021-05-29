@@ -48,22 +48,22 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(7, 6, 5, 4, 3);
 #define LOGO16_GLCD_WIDTH  16
 
 static const unsigned char PROGMEM logo16_glcd_bmp[] =
-{ B00000000, B11000000,
-  B00000001, B11000000,
-  B00000001, B11000000,
-  B00000011, B11100000,
-  B11110011, B11100000,
-  B11111110, B11111000,
-  B01111110, B11111111,
-  B00110011, B10011111,
-  B00011111, B11111100,
-  B00001101, B01110000,
-  B00011011, B10100000,
-  B00111111, B11100000,
-  B00111111, B11110000,
-  B01111100, B11110000,
-  B01110000, B01110000,
-  B00000000, B00110000 };
+{ 0B00000000, 0B11000000,
+  0B00000001, 0B11000000,
+  0B00000001, 0B11000000,
+  0B00000011, 0B11100000,
+  0B11110011, 0B11100000,
+  0B11111110, 0B11111000,
+  0B01111110, 0B11111111,
+  0B00110011, 0B10011111,
+  0B00011111, 0B11111100,
+  0B00001101, 0B01110000,
+  0B00011011, 0B10100000,
+  0B00111111, 0B11100000,
+  0B00111111, 0B11110000,
+  0B01111100, 0B11110000,
+  0B01110000, 0B01110000,
+  0B00000000, 0B00110000 };
 
 void testdrawbitmap(const uint8_t *bitmap, uint8_t w, uint8_t h) {
   uint8_t icons[NUMFLAKES][3];
@@ -86,7 +86,7 @@ void testdrawbitmap(const uint8_t *bitmap, uint8_t w, uint8_t h) {
   while (1) {
     // draw each icon
     for (uint8_t f=0; f< NUMFLAKES; f++) {
-      display.drawBitmap(icons[f][XPOS], icons[f][YPOS], logo16_glcd_bmp, w, h, BLACK);
+      display.drawBitmap(icons[f][XPOS], icons[f][YPOS], bitmap, w, h, BLACK);
     }
     display.display();
     delay(200);
@@ -255,13 +255,13 @@ void testdrawline() {
 
 void setup()   {
   Serial.begin(9600);
-
+Serial.println("PCD test");
   display.begin();
   // init done
 
   // you can change the contrast around to adapt the display
   // for the best viewing!
-  display.setContrast(50);
+  display.setContrast(75);
 
   display.display(); // show splashscreen
   delay(2000);
