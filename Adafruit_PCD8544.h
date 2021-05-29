@@ -64,8 +64,9 @@
 class Adafruit_PCD8544 : public Adafruit_GFX {
 public:
   Adafruit_PCD8544(int8_t sclk_pin, int8_t din_pin, int8_t dc_pin,
-                                   int8_t cs_pin, int8_t rst_pin);
-  Adafruit_PCD8544(int8_t dc_pin, int8_t cs_pin, int8_t rst_pin, SPIClass *theSPI=&SPI);
+                   int8_t cs_pin, int8_t rst_pin);
+  Adafruit_PCD8544(int8_t dc_pin, int8_t cs_pin, int8_t rst_pin,
+                   SPIClass *theSPI = &SPI);
 
   bool begin(uint8_t contrast = 40, uint8_t bias = 0x04);
 
@@ -80,8 +81,8 @@ public:
 
   void clearDisplay(void);
   void display();
-  void updateBoundingBox(uint8_t xmin, uint8_t ymin,
-                         uint8_t xmax, uint8_t ymax);
+  void updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax,
+                         uint8_t ymax);
 
   void setReinitInterval(uint8_t val);
   uint8_t getReinitInterval(void);

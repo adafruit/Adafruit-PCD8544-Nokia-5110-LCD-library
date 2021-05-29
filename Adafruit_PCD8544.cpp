@@ -34,10 +34,9 @@
 #ifdef __AVR__
 #include <avr/pgmspace.h>
 #endif
+#include "Adafruit_PCD8544.h"
 #include "Arduino.h"
 #include <stdlib.h>
-#include "Adafruit_PCD8544.h"
-
 
 /** the memory buffer for the LCD */
 uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
@@ -98,11 +97,11 @@ uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
   @param ymax top
  */
 void Adafruit_PCD8544::updateBoundingBox(uint8_t xmin, uint8_t ymin,
-                       uint8_t xmax, uint8_t ymax) {
-    xUpdateMin = min(xUpdateMin, xmin);
-    xUpdateMax = max(xUpdateMax, xmax);
-    yUpdateMin = min(yUpdateMin, ymin);
-    yUpdateMax = max(yUpdateMax, ymax);
+                                         uint8_t xmax, uint8_t ymax) {
+  xUpdateMin = min(xUpdateMin, xmin);
+  xUpdateMax = max(xUpdateMax, xmax);
+  yUpdateMin = min(yUpdateMin, ymin);
+  yUpdateMax = max(yUpdateMax, ymax);
 }
 
 /*!
@@ -113,10 +112,11 @@ void Adafruit_PCD8544::updateBoundingBox(uint8_t xmin, uint8_t ymin,
   @param cs_pin   CS pin
   @param rst_pin  RST pin
  */
-Adafruit_PCD8544::Adafruit_PCD8544(int8_t sclk_pin, int8_t din_pin, int8_t dc_pin,
-                                   int8_t cs_pin, int8_t rst_pin)
+Adafruit_PCD8544::Adafruit_PCD8544(int8_t sclk_pin, int8_t din_pin,
+                                   int8_t dc_pin, int8_t cs_pin, int8_t rst_pin)
     : Adafruit_GFX(LCDWIDTH, LCDHEIGHT) {
-  spi_dev = new Adafruit_SPIDevice(cs_pin, sclk_pin, -1, din_pin, 4000000); // 4mhz max speed
+  spi_dev = new Adafruit_SPIDevice(cs_pin, sclk_pin, -1, din_pin,
+                                   4000000); // 4mhz max speed
 
   _dcpin = dc_pin;
   _rstpin = rst_pin;
@@ -132,9 +132,11 @@ Adafruit_PCD8544::Adafruit_PCD8544(int8_t sclk_pin, int8_t din_pin, int8_t dc_pi
   @param rst_pin  RST pin
   @param theSPI   Pointer to SPIClass device for hardware SPI
  */
-Adafruit_PCD8544::Adafruit_PCD8544(int8_t dc_pin, int8_t cs_pin, int8_t rst_pin, SPIClass *theSPI)
+Adafruit_PCD8544::Adafruit_PCD8544(int8_t dc_pin, int8_t cs_pin, int8_t rst_pin,
+                                   SPIClass *theSPI)
     : Adafruit_GFX(LCDWIDTH, LCDHEIGHT) {
-  spi_dev = new Adafruit_SPIDevice(cs_pin, 4000000, SPI_BITORDER_MSBFIRST, SPI_MODE0, theSPI);
+  spi_dev = new Adafruit_SPIDevice(cs_pin, 4000000, SPI_BITORDER_MSBFIRST,
+                                   SPI_MODE0, theSPI);
 
   _dcpin = dc_pin;
   _rstpin = rst_pin;
@@ -369,7 +371,7 @@ void Adafruit_PCD8544::display(void) {
     command(PCD8544_SETXADDR | col);
 
     digitalWrite(_dcpin, HIGH);
-    spi_dev->write(pcd8544_buffer+(LCDWIDTH * p), maxcol-col+1);
+    spi_dev->write(pcd8544_buffer + (LCDWIDTH * p), maxcol - col + 1);
     /*
     digitalWrite(_cs, LOW);
     for (; col <= maxcol; col++) {
