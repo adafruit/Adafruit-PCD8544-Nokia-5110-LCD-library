@@ -34,29 +34,10 @@
 #ifdef __AVR__
 #include <avr/pgmspace.h>
 #endif
-
-#if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
-#else
-#include "WProgram.h"
-#endif
-
-#ifdef __AVR__
-#include <util/delay.h>
-#endif
-
-#ifndef _BV
-#define _BV(x) (1 << (x)) ///< Mask for bit position x
-#endif
-
 #include <stdlib.h>
-
 #include "Adafruit_PCD8544.h"
-#include <Adafruit_GFX.h>
 
-#ifndef _BV
-#define _BV(bit) (1 << (bit))
-#endif
 
 /** the memory buffer for the LCD */
 uint8_t pcd8544_buffer[LCDWIDTH * LCDHEIGHT / 8] = {
@@ -142,38 +123,19 @@ static void updateBoundingBox(uint8_t xmin, uint8_t ymin, uint8_t xmax,
 
 /*!
   @brief Constructor for software SPI with explicit CS pin
-  @param SCLK SCLK pin
-  @param DIN  DIN pin
-  @param DC   DC pin
-  @param CS   CS pin
-  @param RST  RST pin
+  @param sclk_pin SCLK pin
+  @param din_pin  DIN pin
+  @param dc_pin   DC pin
+  @param cs_pin   CS pin
+  @param rst_pin  RST pin
  */
-Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC,
-                                   int8_t CS, int8_t RST)
+Adafruit_PCD8544::Adafruit_PCD8544(int8_t sclk_pin, int8_t din_pin, int8_t dc_pin,
+                                   int8_t cs_pin, int8_t rst_pin)
     : Adafruit_GFX(LCDWIDTH, LCDHEIGHT) {
-  _din = DIN;
-  _sclk = SCLK;
-  _dc = DC;
-  _rst = RST;
-  _cs = CS;
-}
+  spi_dev = new Adafruit_SPIDevice(cs_pin, sclk_pin, -1, din_pin, 1000000);
 
-/*!
-  @brief Constructor for software SPI with CS tied to ground. Saves a pin but
-  other pins can't be shared with other hardware.
-  @param SCLK SCLK pin
-  @param DIN  DIN pin
-  @param DC   DC pin
-  @param RST  RST pin
- */
-Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC,
-                                   int8_t RST)
-    : Adafruit_GFX(LCDWIDTH, LCDHEIGHT) {
-  _din = DIN;
-  _sclk = SCLK;
-  _dc = DC;
-  _rst = RST;
-  _cs = -1;
+  _dcpin = dc_pin;
+  _rstpin = rst_pin;
 }
 
 /*!
@@ -181,18 +143,17 @@ Adafruit_PCD8544::Adafruit_PCD8544(int8_t SCLK, int8_t DIN, int8_t DC,
   and MOSI (DIN) pins. CS is still controlled by any IO pin. NOTE: MISO and SS
   will be set as an input and output respectively, so be careful sharing those
   pins!
-  @param DC  DC pin
-  @param CS  CS pin
-  @param RST RST pin
+  @param dc_pin   DC pin
+  @param cs_pin   CS pin
+  @param rst_pin  RST pin
+  @param theSPI   Pointer to SPIClass device for hardware SPI
  */
-Adafruit_PCD8544::Adafruit_PCD8544(int8_t DC, int8_t CS, int8_t RST)
+Adafruit_PCD8544::Adafruit_PCD8544(int8_t dc_pin, int8_t cs_pin, int8_t rst_pin, SPIClass *theSPI)
     : Adafruit_GFX(LCDWIDTH, LCDHEIGHT) {
-  // -1 for din and sclk specify using hardware SPI
-  _din = -1;
-  _sclk = -1;
-  _dc = DC;
-  _rst = RST;
-  _cs = CS;
+  spi_dev = new Adafruit_SPIDevice(cs_pin, 1000000, SPI_BITORDER_MSBFIRST, SPI_MODE0, theSPI);
+
+  _dcpin = dc_pin;
+  _rstpin = rst_pin;
 }
 
 /*!
@@ -254,10 +215,11 @@ uint8_t Adafruit_PCD8544::getPixel(int8_t x, int8_t y) {
 void Adafruit_PCD8544::initDisplay() {
 
   // toggle RST low to reset
-  if (_rst > 0) {
-    digitalWrite(_rst, LOW);
-    delay(500);
-    digitalWrite(_rst, HIGH);
+  if (_rstpin >= 0) {
+    pinMode(_rstpin, OUTPUT);
+    digitalWrite(_rstpin, LOW);
+    delay(1); // 1 ns minimum
+    digitalWrite(_rstpin, HIGH);
   }
 
   setBias(_bias);
@@ -275,33 +237,16 @@ void Adafruit_PCD8544::initDisplay() {
   @param contrast Initial contrast value
   @param bias     Initial bias value
  */
-void Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
-  if (isHardwareSPI()) {
-    // Setup hardware SPI.
-    SPI.begin();
-    SPI.setClockDivider(PCD8544_SPI_CLOCK_DIV);
-    SPI.setDataMode(SPI_MODE0);
-    SPI.setBitOrder(MSBFIRST);
-  } else {
-    // Setup software SPI.
+bool Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
 
-    // Set software SPI specific pin outputs.
-    pinMode(_din, OUTPUT);
-    pinMode(_sclk, OUTPUT);
-
-    // Set software SPI ports and masks.
-    clkport = portOutputRegister(digitalPinToPort(_sclk));
-    clkpinmask = digitalPinToBitMask(_sclk);
-    mosiport = portOutputRegister(digitalPinToPort(_din));
-    mosipinmask = digitalPinToBitMask(_din);
+  if (!spi_dev->begin()) {
+    return false;
   }
 
   // Set common pin outputs.
-  pinMode(_dc, OUTPUT);
-  if (_rst > 0)
-    pinMode(_rst, OUTPUT);
-  if (_cs > 0)
-    pinMode(_cs, OUTPUT);
+  pinMode(_dcpin, OUTPUT);
+  if (_rstpin >= 0)
+    pinMode(_rstpin, OUTPUT);
 
   _bias = bias;
   _contrast = contrast;
@@ -319,46 +264,17 @@ void Adafruit_PCD8544::begin(uint8_t contrast, uint8_t bias) {
   updateBoundingBox(0, 0, LCDWIDTH - 1, LCDHEIGHT - 1);
   // Push out pcd8544_buffer to the Display (will show the AFI logo)
   display();
-}
 
-/*!
-  @brief Write a byte to SPI
-  @param d Byte to write
- */
-inline void Adafruit_PCD8544::spiWrite(uint8_t d) {
-  if (isHardwareSPI()) {
-    // Hardware SPI write.
-    SPI.transfer(d);
-  } else {
-    // Software SPI write with bit banging.
-    for (uint8_t bit = 0x80; bit; bit >>= 1) {
-      *clkport &= ~clkpinmask;
-      if (d & bit)
-        *mosiport |= mosipinmask;
-      else
-        *mosiport &= ~mosipinmask;
-      *clkport |= clkpinmask;
-    }
-  }
+  return true;
 }
-
-/*!
-  @brief  Using hardware or software SPI?
-  @return True if hardware SPI, false if not
- */
-bool Adafruit_PCD8544::isHardwareSPI() { return (_din == -1 && _sclk == -1); }
 
 /*!
   @brief  Send a command to the LCD
   @param c Command byte
  */
 void Adafruit_PCD8544::command(uint8_t c) {
-  digitalWrite(_dc, LOW);
-  if (_cs > 0)
-    digitalWrite(_cs, LOW);
-  spiWrite(c);
-  if (_cs > 0)
-    digitalWrite(_cs, HIGH);
+  digitalWrite(_dcpin, LOW);
+  spi_dev->write(&c, 1);
 }
 
 /*!
@@ -366,12 +282,8 @@ void Adafruit_PCD8544::command(uint8_t c) {
   @param c Data byte
  */
 void Adafruit_PCD8544::data(uint8_t c) {
-  digitalWrite(_dc, HIGH);
-  if (_cs > 0)
-    digitalWrite(_cs, LOW);
-  spiWrite(c);
-  if (_cs > 0)
-    digitalWrite(_cs, HIGH);
+  digitalWrite(_dcpin, HIGH);
+  spi_dev->write(&c, 1);
 }
 
 /*!
@@ -472,14 +384,16 @@ void Adafruit_PCD8544::display(void) {
 
     command(PCD8544_SETXADDR | col);
 
-    digitalWrite(_dc, HIGH);
-    if (_cs > 0)
-      digitalWrite(_cs, LOW);
+    digitalWrite(_dcpin, HIGH);
+    spi_dev->write(pcd8544_buffer+(LCDWIDTH * p), maxcol-col);
+    /*
+    digitalWrite(_cs, LOW);
     for (; col <= maxcol; col++) {
       spiWrite(pcd8544_buffer[(LCDWIDTH * p) + col]);
     }
     if (_cs > 0)
       digitalWrite(_cs, HIGH);
+      */
   }
 
   command(PCD8544_SETYADDR); // no idea why this is necessary but it is to
