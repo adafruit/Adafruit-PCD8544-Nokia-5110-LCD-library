@@ -88,7 +88,7 @@ public:
   uint8_t getReinitInterval(void);
 
   void drawPixel(int16_t x, int16_t y, uint16_t color);
-  bool setPixel(int16_t x, int16_t y, bool color, uint8_t *buffer);
+  void setPixel(int16_t x, int16_t y, bool color, uint8_t *buffer);
   bool getPixel(int16_t x, int16_t y, uint8_t *buffer);
 
   void initDisplay();

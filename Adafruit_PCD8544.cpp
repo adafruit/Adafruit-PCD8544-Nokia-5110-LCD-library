@@ -141,8 +141,7 @@ Adafruit_PCD8544::Adafruit_PCD8544(int8_t dc_pin, int8_t cs_pin, int8_t rst_pin,
   @param color pixel color (BLACK or WHITE)
  */
 void Adafruit_PCD8544::drawPixel(int16_t x, int16_t y, uint16_t color) {
-  if (setPixel(x, y, color, pcd8544_buffer))
-    updateBoundingBox(x, y, x, y);
+  setPixel(x, y, color, pcd8544_buffer);
 }
 
 /*!
@@ -151,12 +150,11 @@ void Adafruit_PCD8544::drawPixel(int16_t x, int16_t y, uint16_t color) {
   @param y     y coord
   @param color pixel color (BLACK or WHITE)
   @param buffer The framebuffer to set the pixel in
-  @return      pixel is visible
  */
-bool Adafruit_PCD8544::setPixel(int16_t x, int16_t y, bool color,
+void Adafruit_PCD8544::setPixel(int16_t x, int16_t y, bool color,
                                 uint8_t *buffer) {
   if ((x < 0) || (x >= _width) || (y < 0) || (y >= _height))
-    return false;
+    return;
 
   int16_t t;
   switch (rotation) {
@@ -175,13 +173,13 @@ bool Adafruit_PCD8544::setPixel(int16_t x, int16_t y, bool color,
     y = t;
     break;
   }
+  updateBoundingBox(x, y, x, y);
 
   // x is which column
   if (color)
     buffer[x + (y / 8) * LCDWIDTH] |= 1 << (y % 8);
   else
     buffer[x + (y / 8) * LCDWIDTH] &= ~(1 << (y % 8));
-  return true;
 }
 
 /*!
