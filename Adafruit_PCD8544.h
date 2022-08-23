@@ -68,6 +68,8 @@ public:
   Adafruit_PCD8544(int8_t dc_pin, int8_t cs_pin, int8_t rst_pin,
                    SPIClass *theSPI = &SPI);
 
+  virtual ~Adafruit_PCD8544() {}
+
   bool begin(uint8_t contrast = 40, uint8_t bias = 0x04);
 
   void command(uint8_t c);
